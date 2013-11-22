@@ -1,6 +1,6 @@
 {
   "name": "nodejs-against-humanity",
-  "version": "1.0.0-13",
+  "version": "1.0.0-14",
   "description": "Cards Against Humanities implemented in NodeJS",
   "main": "server.js",
   "scripts": {
