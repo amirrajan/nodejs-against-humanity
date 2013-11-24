@@ -82,6 +82,10 @@ Assign a dyno to your app:
 
     heroku ps:scale web=1
 
+Enable websockets (currently in beta):
+
+    heroku labs:enable websockets
+
 Open the app (same as opening it in the browser):
 
     heroku open
