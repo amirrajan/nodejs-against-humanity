@@ -1,17 +1,16 @@
 var express = require('express');
-var app = express()
+var app = express();
 var server = require('http').createServer(app);
-var Game = require('./game.js')
+var Game = require('./game.js');
 var players = { };
 var io = require('socket.io').listen(server);
-var _ = require('underscore');
 
 server.listen(process.env.PORT || 3000);
 
 app.set('view engine', 'ejs');
 app.set('view options', { layout: false });
 app.use(express.methodOverride());
-app.use(express.bodyParser());  
+app.use(express.bodyParser());
 app.use(app.router);
 app.use('/public', express.static('public'));
 
@@ -38,7 +37,10 @@ function gameViewModel(gameId) {
 
 io.sockets.on('connection', function(socket) {
   socket.on('connectToGame', function(data) {
-    if(!players[data.gameId]) players[data.gameId] = { };
+    if(!players[data.gameId]) {
+      players[data.gameId] = { };
+    }
+
     socket.gameId = data.gameId;
     socket.playerId = data.playerId;
     players[data.gameId][data.playerId] = socket;
@@ -65,8 +67,8 @@ app.post('/joingame', function (req, res) {
     res.write(JSON.stringify({ error: "too many players" }));
     res.end();
     return null;
-  }	
-  
+  }
+
   game = Game.joinGame(game, { id: req.body.playerId, name: req.body.playerName });
   returnGame(req.body.gameId, res);
 });
