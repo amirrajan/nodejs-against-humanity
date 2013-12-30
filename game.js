@@ -47,7 +47,7 @@ function addGame(game) {
 }
 
 function getGame(gameId) {
-  return _.find(gameList, function(x) { return x.id === gameId; });
+    return _.find(gameList, function(x) { return x.id === gameId; }) || {};
 }
 
 function joinGame(game, player) {
