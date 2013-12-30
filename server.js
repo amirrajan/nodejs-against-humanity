@@ -35,6 +35,13 @@ function gameViewModel(gameId) {
   return viewModel;
 }
 
+var lobbySocket = io
+    .of('/lobby')
+    .on('connection', function(socket) {
+        var gameList = Game.list();
+        socket.emit('lobbyJoin', gameList);
+    })
+
 io.sockets.on('connection', function(socket) {
   socket.on('connectToGame', function(data) {
     if(!players[data.gameId[0]]) {
@@ -48,7 +55,9 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('disconnect', function() {
-    delete players[socket.gameId][socket.playerId];
+    if(socket.playerId && socket.gameId){
+        delete players[socket.gameId][socket.playerId];
+    }
   });
 });
 
@@ -56,7 +65,11 @@ app.get('/', function (req, res) { res.render('index'); });
 app.get('/game', function (req, res) { res.render('game'); });
 app.get('/list', function (req, res) { json(Game.list(), res); });
 app.get('/listall', function (req, res) { json(Game.listAll(), res); });
-app.post('/add', function (req, res) { json(Game.addGame(req.body), res); });
+app.post('/add', function (req, res) {
+    var newGame = Game.addGame(req.body);
+    json(newGame, res);
+    lobbySocket.emit('gameAdded', Game.list());
+});
 app.get('/gamebyid', function (req, res) { json(Game.getGame(req.query.id), res); });
 
 app.post('/joingame', function (req, res) {
@@ -71,6 +84,7 @@ app.post('/joingame', function (req, res) {
 
   game = Game.joinGame(game, { id: req.body.playerId, name: req.body.playerName });
   returnGame(req.body.gameId, res);
+  lobbySocket.emit('gameAdded', Game.list());
 });
 
 app.post('/selectcard', function(req, res) {
