@@ -57,6 +57,8 @@ io.sockets.on('connection', function(socket) {
   socket.on('disconnect', function() {
     if(socket.playerId && socket.gameId){
         delete players[socket.gameId][socket.playerId];
+        Game.departGame(Game.getGame(socket.gameId), socket.playerId);
+        lobbySocket.emit('gameAdded', Game.list());
     }
   });
 });
