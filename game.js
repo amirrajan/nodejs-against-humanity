@@ -67,6 +67,17 @@ function joinGame(game, player) {
   return game;
 }
 
+function departGame(game, playerId) {
+    var departingPlayer = _.find(game.players, function(p){
+        return p.id === playerId;
+    });
+    removeFromArray(game.players, departingPlayer);
+    if(game.players.length === 0){
+        //kill the game
+        removeFromArray(gameList, game);
+    }
+}
+
 function startGame(game) {
   game.isStarted = true;
   setCurrentBlackCard(game);
@@ -195,6 +206,7 @@ exports.addGame = addGame;
 exports.getGame = getGame;
 exports.getPlayer = getPlayer;
 exports.joinGame = joinGame;
+exports.departGame = departGame;
 exports.readyForNextRound = readyForNextRound;
 exports.reset = reset;
 exports.roundEnded = roundEnded;
