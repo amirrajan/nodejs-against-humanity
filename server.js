@@ -74,19 +74,19 @@ app.post('/joingame', function (req, res) {
 });
 
 app.post('/selectcard', function(req, res) {
-  Game.selectCard(req.body.gameId, req.body.playerId, req.body.whiteCardId);
-  broadcastGame(req.body.gameId);
-  returnGame(req.body.gameId, res);
+  Game.selectCard(req.body.gameId[0], req.body.playerId[0], req.body.whiteCardId);
+  broadcastGame(req.body.gameId[0]);
+  returnGame(req.body.gameId[0], res);
 });
 
 app.post('/selectWinner', function(req, res) {
-  Game.selectWinner(req.body.gameId, req.body.cardId);
-  broadcastGame(req.body.gameId);
-  returnGame(req.body.gameId, res);
+  Game.selectWinner(req.body.gameId[0], req.body.cardId);
+  broadcastGame(req.body.gameId[0]);
+  returnGame(req.body.gameId[0], res);
 });
 
 app.post('/readyForNextRound', function(req, res){
-  Game.readyForNextRound(req.body.gameId, req.body.playerId);
-  broadcastGame(req.body.gameId);
-  returnGame(req.body.gameId, res);
+  Game.readyForNextRound(req.body.gameId[0], req.body.playerId[0]);
+  broadcastGame(req.body.gameId[0]);
+  returnGame(req.body.gameId[0], res);
 });
