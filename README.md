@@ -18,6 +18,18 @@ Run the app:
 
 Then navigate to `http://localhost:3000`
 
+If you want tests to execute every time you change a file:
+
+    jasmine-node ./spec/describe_Game_spec.js --autotest --watch ./game.js
+
+If you want the server to load up everytime you change the back end:
+
+    npm install -g nodemone
+
+Then run the following instead of `node server.js`:
+
+    nodemon server.js
+
 ##Signing up, and deploying to Nodejitsu
 
 ###Documentation
