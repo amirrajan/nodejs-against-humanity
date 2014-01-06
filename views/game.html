@@ -1,0 +1,80 @@
+        <div class="row">
+            <div class="col-lg-10">
+                {{gameError}}
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col-lg-12">
+                Playing Game: {{game.name}}. IsStarted: {{game.isStarted}}. IsCzar: {{currentPlayer.isCzar}}, ReadyforScoring: {{game.isReadyForScoring}}
+            </div>
+        </div>
+        <div id="notificationWaitingOnRound" ng-show="!game.isStarted" class="center row alert alert-warning">waiting on round to start</div>
+        <div class="row blackCard">
+            <div class="col-lg-10">
+                {{game.currentBlackCard}}
+            </div>
+        </div>
+        <br>
+        <div id="notificationCardCzar" ng-show="currentPlayer.isCzar" class="row alert alert-info center">you are the Card Czar</div>
+        <div id="notificationSelectCard" ng-show="!currentPlayer.isCzar && !currentPlayer.selectedWhiteCardId && game.isStarted && !game.isReadyForScoring" class="row alert alert-success center">select a card to play</div>
+        <div id="notificationWaitingOnCzar" ng-show="!currentPlayer.isCzar && game.isReadyForScoring && !game.isReadyForReview" class="row alert alert-warning center">waiting for the Card Czar to pick winner</div>
+        <div id="notificationWaitingOnCards" ng-show="(currentPlayer.isCzar || currentPlayer.selectedWhiteCardId) && !game.isReadyForScoring" class="row alert alert-warning center">waiting for other players</div>
+        <div id="notificationSelectWinner" ng-show="currentPlayer.isCzar && game.isReadyForScoring && !game.isReadyForReview" class="row alert alert-success center">select a card to be the winner</div>
+        <div class="row" ng-show="!currentPlayer.isCzar && game.isStarted && !game.isReadyForScoring">
+            <table id="whiteCards" class="table">
+                <tbody id="whiteCardSelection">
+                    <tr ng-repeat="whiteCard in currentPlayer.cards">
+                        <td class="center" style="font-weight: bold; line-height: 25px;">{{whiteCard}}</td>
+                        <td class="span2" style="line-height: 25px;">
+                            <button class="btn btn-default" ng-class="getButtonClass(whiteCard)" ng-click="selectCard(whiteCard)">{{getButtonText(whiteCard)}}</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="row" ng-show="(currentPlayer.isCzar && game.isStarted && game.isReadyForScoring) || game.isReadyForReview">
+            <table id="selectedWhiteCards" class="table">
+                <tbody>
+                    <tr ng-repeat="player in game.players | filter:whiteCardNonNull" ng-class="getWinningCardClass(player.selectedWhiteCardId)">
+                        <td style="font-weight: bold; line-height: 25px;"><span ng-show="game.winningCardId === player.selectedWhiteCardId">Winner: &nbsp;</span>{{player.selectedWhiteCardId}}</td>
+                        <td style="line-height: 25px;">
+                            <button class="btn btn-default" ng-show="!game.isReadyForReview" ng-click="selectWinner(player.selectedWhiteCardId)">select</button>
+                            <span ng-show="game.isReadyForReview">{{player.name}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="notificationRoundComplete" ng-show="game.isReadyForReview" class="row alert alert-info center">winner selected, next round will start when everyone is ready</div>
+        <div id="buttonNextRound" ng-show="game.isReadyForReview && !currentPlayer.isReady" class="row">
+            <button ng-click="readyForNextRound()" ng-show="!game.isOver" class="btn btn-lg btn-primary btn-block">ready</button>
+            <button ng-click="readyForNextRound()" ng-show="game.isOver" class="btn btn-lg btn-primary btn-block">start new game</button>
+        </div>
+        <div class="row">
+            <h4>Round Progress</h4>
+            <div class="progress">
+                <div id="gameProgress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" ng-style="progStyle">
+                </div>
+            </div>
+            <table id="roundSummary" class="table">
+                <tbody id="roundSummaryEntries">
+                </tbody>
+            </table>
+        </div>
+        <div id="points" class="row">
+            <div class="well" style="font-size: 20px">Your Awesome Score: <span id="pointsValue">{{currentPlayer.awesomePoints}}</span></div>
+        </div>
+        <div id="roundPlayers" class="row"> </div>
+        <h4>Game History</h4>
+        <div id="roundHistory" class="row">
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat="player in game.players">
+                    <span class="badge pull-left">{{player.awesomePoints}}</span>
+                    &nbsp;&nbsp;{{player.name}}
+                    <span class="pull-right">{{getPlayerStatus(player)}}</span>
+                </li>
+            </ul>
+        </div>
+        <h4>Round Winners</h4>
+        <span>todo</span>

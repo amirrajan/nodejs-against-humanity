@@ -2,8 +2,10 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var Game = require('./game.js');
+var routes = require('./routes/routes.js');
 var players = { };
 var io = require('socket.io').listen(server);
+var socketCount = 0;
 
 server.listen(process.env.PORT || 3000);
 
@@ -38,33 +40,51 @@ function gameViewModel(gameId) {
 var lobbySocket = io
     .of('/lobby')
     .on('connection', function(socket) {
+        console.info('lobby socket connect');
         var gameList = Game.list();
         socket.emit('lobbyJoin', gameList);
     })
 
 io.sockets.on('connection', function(socket) {
-  socket.on('connectToGame', function(data) {
-    if(!players[data.gameId[0]]) {
-      players[data.gameId[0]] = { };
-    }
-
-    socket.gameId = data.gameId[0];
-    socket.playerId = data.playerId[0];
-    players[data.gameId][data.playerId[0]] = socket;
-    broadcastGame(data.gameId[0]);
+    socketCount+=1;
+    console.info('*****SocketCount: ' + socketCount);
+    socket.on('connectToGame', function(data) {
+        console.info('server: connectToGame');
+        var game = Game.getGame(data.gameId);
+        if(game){
+            if(game.players.length >= 4){
+                socket.emit('gameError', "Game is Full");
+            } else{
+                //join the game
+                Game.joinGame(game, { id: data.playerId, name: data.playerName });
+                lobbySocket.emit('gameAdded', Game.list());
+                if(!players[data.gameId]) {
+                    players[data.gameId] = { };
+                }
+                socket.gameId = data.gameId;
+                socket.playerId = data.playerId;
+                players[data.gameId][data.playerId] = socket;
+                broadcastGame(data.gameId);
+            }
+          } else {
+            socket.emit('gameError', 'Invalid Game ID');
+        }
   });
 
   socket.on('disconnect', function() {
+    socketCount-=1;
     if(socket.playerId && socket.gameId){
+        console.info('socket disconnect ' + socket.playerId);
         delete players[socket.gameId][socket.playerId];
-        Game.departGame(Game.getGame(socket.gameId), socket.playerId);
+        Game.departGame(socket.gameId, socket.playerId);
         lobbySocket.emit('gameAdded', Game.list());
     }
   });
 });
-
-app.get('/', function (req, res) { res.render('index'); });
-app.get('/game', function (req, res) { res.render('game'); });
+app.get('/', routes.index);
+app.get('/views/*', routes.partials);
+//app.get('/', function (req, res) { res.render('index'); });
+//app.get('/game', function (req, res) { res.render('game'); });
 app.get('/list', function (req, res) { json(Game.list(), res); });
 app.get('/listall', function (req, res) { json(Game.listAll(), res); });
 app.post('/add', function (req, res) {
@@ -89,20 +109,25 @@ app.post('/joingame', function (req, res) {
   lobbySocket.emit('gameAdded', Game.list());
 });
 
+app.post('/departgame', function(req, res) {
+    Game.departGame(req.body.gameId, req.body.playerId);
+    lobbySocket.emit('gameAdded', Game.list());
+});
+
 app.post('/selectcard', function(req, res) {
-  Game.selectCard(req.body.gameId[0], req.body.playerId[0], req.body.whiteCardId);
-  broadcastGame(req.body.gameId[0]);
-  returnGame(req.body.gameId[0], res);
+  Game.selectCard(req.body.gameId, req.body.playerId, req.body.whiteCardId);
+  broadcastGame(req.body.gameId);
+  returnGame(req.body.gameId, res);
 });
 
 app.post('/selectWinner', function(req, res) {
-  Game.selectWinner(req.body.gameId[0], req.body.cardId);
-  broadcastGame(req.body.gameId[0]);
-  returnGame(req.body.gameId[0], res);
+  Game.selectWinner(req.body.gameId, req.body.cardId);
+  broadcastGame(req.body.gameId);
+  returnGame(req.body.gameId, res);
 });
 
 app.post('/readyForNextRound', function(req, res){
-  Game.readyForNextRound(req.body.gameId[0], req.body.playerId[0]);
-  broadcastGame(req.body.gameId[0]);
-  returnGame(req.body.gameId[0], res);
+  Game.readyForNextRound(req.body.gameId, req.body.playerId);
+  broadcastGame(req.body.gameId);
+  returnGame(req.body.gameId, res);
 });
