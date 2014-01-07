@@ -2,37 +2,53 @@ var _ = require('underscore');
 var Game = require('../game.js')
 
 describe('multi-libs', function() {
-  var player1 = "Player1";
-  var player2 = "Player2";
-  var player3 = "Player3";
-  var player4 = "Player4";
+  var playerList = [
+    "Player1",
+    "Player2",
+    "Player3",
+    "Player4"
+  ];
   var gameId = "ANewGame";
   var currentGame;
 
   function createGame() {
     Game.addGame({ id: gameId, name: "some game" });
     currentGame = Game.getGame(gameId);
-  }
+  };
 
   function joinCurrentGame(playerId) {
     Game.joinGame(currentGame, { id: playerId, name: playerId });
-  }
+  };
 
   function playCard(playerId) {
     var player = _.findWhere(currentGame.players, { id: playerId });
     expect(player.isCzar).toBe(false);
     Game.selectCard(currentGame.id, playerId, player.cards[0]);
     currentGame = Game.getGame(gameId);
-  }
+  };
+
+  function allPlayersButCzarPlayCard() {
+      _.map(playerList, function(p) {
+          var player = _.findWhere(currentGame.players, { id: p });
+          if(!player.isCzar) {
+              playCard(p);
+          }
+      });
+  };
+
+  function getFirstNonCzar(game) {
+      return _.find(currentGame.players, function(p) {
+          return p.isCzar === false;
+      })
+  };
 
   function startGame() {
     createGame();
-    joinCurrentGame(player1);
-    joinCurrentGame(player2);
-    joinCurrentGame(player3);
-    joinCurrentGame(player4);
+    _.map(playerList, function(p) {
+      joinCurrentGame(p);
+    });
     currentGame = Game.getGame(gameId);
-  }
+  };
 
   beforeEach(Game.reset);
 
@@ -85,9 +101,7 @@ describe('multi-libs', function() {
 
     describe('each player except the czar plays a card', function() {
       beforeEach(function() {
-        playCard(player2);
-        playCard(player3);
-        playCard(player4);
+          allPlayersButCzarPlayCard();
       });
 
       it('the round is ready for scoring', function() {
@@ -98,7 +112,8 @@ describe('multi-libs', function() {
         var cardId;
 
         beforeEach(function() {
-          cardId = currentGame.players[1].cards[0];
+          var playerToPick = getFirstNonCzar(currentGame);
+          cardId = playerToPick.cards[0];
           Game.selectWinner(gameId, cardId);
           currentGame = Game.getGame(gameId);
         });
@@ -124,10 +139,9 @@ describe('multi-libs', function() {
             whiteCardCount = currentGame.deck.white.length;
             blackCardCount = currentGame.deck.black.length;
             blackCard = currentGame.currentBlackCard;
-            Game.readyForNextRound(gameId, currentGame.players[0].id);
-            Game.readyForNextRound(gameId, currentGame.players[1].id);
-            Game.readyForNextRound(gameId, currentGame.players[2].id);
-            Game.readyForNextRound(gameId, currentGame.players[3].id);
+            _.map(currentGame.players, function(p) {
+              Game.readyForNextRound(gameId, p.id);
+            });
             currentGame = Game.getGame(gameId);
           });
 
@@ -153,5 +167,52 @@ describe('multi-libs', function() {
         });
       });
     });
+  });
+
+
+  describe('fullGame', function() {
+      beforeEach(startGame);
+      describe('play enough rounds to reach the pointsToWin', function() {
+
+          beforeEach(function() {
+              var maxScore = 0;
+              while(maxScore < currentGame.pointsToWin) {
+                  allPlayersButCzarPlayCard();
+                  var playerToPick = getFirstNonCzar(currentGame);
+                  var cardId = playerToPick.cards[0];
+                  Game.selectWinner(gameId, cardId);
+                  maxScore = _.max(currentGame.players, function(p) {
+                      return p.awesomePoints;
+                  }).awesomePoints;
+                  if(maxScore < currentGame.pointsToWin){
+                      //everyone ready for next round
+                      _.map(currentGame.players, function(p) {
+                          Game.readyForNextRound(gameId, p.id);
+                      });
+                  }
+              }
+          });
+
+          it('game is over after last round is played', function() {
+              expect(currentGame.isOver).toBe(true);
+          });
+
+          describe('all players ready after winning round', function() {
+              beforeEach(function() {
+                  _.map(currentGame.players, function(p) {
+                      Game.readyForNextRound(gameId, p.id);
+                  });
+              });
+
+              it('game isOver should be false and all player points should be zero', function() {
+                  expect(currentGame.isOver).toBe(false);
+                  expect(currentGame.isStarted).toBe(true);
+                  _.map(currentGame.players, function(p) {
+                      expect(p.awesomePoints).toBe(0);
+                  })
+              });
+          })
+
+      });
   });
 });

@@ -16,7 +16,7 @@ function removeFromArray(array, item) {
 
 function list() {
   return toInfo(_.filter(gameList, function(x) {
-    return x.players.length < 4;
+    return x.players.length < 4 && !x.isStarted
   }));
 }
 
@@ -47,34 +47,55 @@ function addGame(game) {
 }
 
 function getGame(gameId) {
-    return _.find(gameList, function(x) { return x.id === gameId; }) || {};
+    return _.find(gameList, function(x) { return x.id === gameId; }) || undefined;
 }
 
 function joinGame(game, player) {
-  game.players.push({
+    var joiningPlayer = {
     id: player.id,
     name: player.name,
     isReady: false,
+    cards : [],
     selectedWhiteCardId: null,
     awesomePoints: 0,
     isCzar: false
-  });
+    };
 
-  if(game.players.length === 4) {
-    startGame(game);
-  }
+    for(var i = 0; i < 7; i++) {
+        drawWhiteCard(game, joiningPlayer);
+    }
 
-  return game;
+    game.players.push(joiningPlayer);
+
+    if(game.players.length === 4) {
+        if(!game.isStarted){
+            startGame(game);
+        } else {
+            //someone may have dropped and rejoined. If it was the Czar, we need to re-elect the re-joining player
+            var currentCzar = _.find(game.players, function(p) {
+                return p.isCzar == true;
+            });
+            if(!currentCzar){
+                game.players[game.players.length - 1].isCzar = true;
+            }
+        }
+    }
+
+    return game;
 }
 
-function departGame(game, playerId) {
-    var departingPlayer = _.find(game.players, function(p){
-        return p.id === playerId;
-    });
-    removeFromArray(game.players, departingPlayer);
-    if(game.players.length === 0){
-        //kill the game
-        removeFromArray(gameList, game);
+function departGame(gameId, playerId) {
+    var game = getGame(gameId);
+    if(game){
+        console.info('depart game: ' + game.name);
+        var departingPlayer = _.find(game.players, function(p){
+            return p.id === playerId;
+        });
+        removeFromArray(game.players, departingPlayer);
+        if(game.players.length === 0){
+            //kill the game
+            removeFromArray(gameList, game);
+        }
     }
 }
 
@@ -82,12 +103,6 @@ function startGame(game) {
   game.isStarted = true;
   setCurrentBlackCard(game);
   game.players[0].isCzar = true;
-  _.each(game.players, function(player) {
-    player.cards = [];
-    for(var i = 0; i < 7; i++) {
-      drawWhiteCard(game, player);
-    }
-  });
 }
 
 function roundEnded(game) {
@@ -128,6 +143,12 @@ function roundEnded(game) {
     game.players[0].isCzar = true;
     game.players[0].isReady = false;
   }
+    if(game.isOver){
+        _.map(game.players, function(p) {
+            p.awesomePoints = 0;
+        });
+        game.isOver = false;
+    }
 }
 
 function drawWhiteCard(game, player) {
