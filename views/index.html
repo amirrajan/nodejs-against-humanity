@@ -12,7 +12,6 @@
             padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
         }
     </style>
-    <!--<link href="/public/css/bootstrap-responsive.css" rel="stylesheet">-->
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -33,22 +32,25 @@
                 <div class="form-group">
                     <input type="text" class="form-control" placeholder="enter name" ng-model="gameSvc.playerName">
                 </div>
-                <!--<button type="submit" class="btn btn-default" ng-click="createGame()">Start</button>-->
             </form>
         </div>
     </nav>
     <div class="container">
-        <!--<div class="row">-->
-            <!--<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">-->
-                <!--<img alt="Creative Commons License" style="display: block; margin-left: auto; margin-right: auto;" src="http://i.creativecommons.org/l/by-nc-sa/2.0/88x31.png" /></a>-->
-            <!--<br />-->
-            <!--This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic License</a>.-->
-            <!--<br />-->
-            <!--This site is not affliated in any way with the official Cards Against Humanities.-->
-        <!--</div>-->
+        <div class="row">
+            <div class="col-sm-2">
+                <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">
+                <img alt="Creative Commons License" style="display: block; margin-left: auto; margin-right: auto;" src="http://i.creativecommons.org/l/by-nc-sa/2.0/88x31.png" /></a>
+            </div>
+            <div class="col-sm-10">
+                <small>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic License</a>.</small>
+                <br />
+                <small>This site is not affliated in any way with the official Cards Against Humanities.</small>
+            </div>
+        </div>
+        <br>
         <div ng-view></div>
         <br>
-        <div>v<span app-version></span></div>
+        <div>comitted:&nbsp;<span app-version></span></div>
     </div>
 
 

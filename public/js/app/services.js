@@ -6,7 +6,7 @@
 // Demonstrate how to register services
 // In this case it is a simple value service.
 angular.module('myApp.services', []).
-  value('version', '0.1')
+  value('version', 'Jan-7-2014')
     .factory('GameService', function($http) {
 
         var s4 = function() {
