@@ -17,11 +17,11 @@
         </div>
         <br>
         <div id="notificationCardCzar" ng-show="currentPlayer.isCzar" class="row alert alert-info center">you are the Card Czar</div>
-        <div id="notificationSelectCard" ng-show="!currentPlayer.isCzar && !currentPlayer.selectedWhiteCardId && game.isStarted && !game.isReadyForScoring" class="row alert alert-success center">select a card to play</div>
-        <div id="notificationWaitingOnCzar" ng-show="!currentPlayer.isCzar && game.isReadyForScoring && !game.isReadyForReview" class="row alert alert-warning center">waiting for the Card Czar to pick winner</div>
-        <div id="notificationWaitingOnCards" ng-show="(currentPlayer.isCzar || currentPlayer.selectedWhiteCardId) && !game.isReadyForScoring" class="row alert alert-warning center">waiting for other players</div>
-        <div id="notificationSelectWinner" ng-show="currentPlayer.isCzar && game.isReadyForScoring && !game.isReadyForReview" class="row alert alert-success center">select a card to be the winner</div>
-        <div class="row" ng-show="!currentPlayer.isCzar && game.isStarted && !game.isReadyForScoring">
+        <div id="notificationSelectCard" ng-show="showNotificationSelectCard()" class="row alert alert-success center">select a card to play</div>
+        <div id="notificationWaitingOnCzar" ng-show="showNotificationWaitingOnCzar()" class="row alert alert-warning center">waiting for the Card Czar to pick winner</div>
+        <div id="notificationWaitingOnCards" ng-show="showNotificationWaitingOnCards()" class="row alert alert-warning center">waiting for other players</div>
+        <div id="notificationSelectWinner" ng-show="showNotificationSelectWinner()" class="row alert alert-success center">select a card to be the winner</div>
+        <div class="row" ng-show="showWhiteCardList()">
             <table id="whiteCards" class="table">
                 <tbody id="whiteCardSelection">
                     <tr ng-repeat="whiteCard in currentPlayer.cards">
@@ -33,7 +33,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="row" ng-show="(currentPlayer.isCzar && game.isStarted && game.isReadyForScoring) || game.isReadyForReview">
+        <div class="row" ng-show="showSelectedWhiteCardList()">
             <table id="selectedWhiteCards" class="table">
                 <tbody>
                     <tr ng-repeat="player in game.players | filter:whiteCardNonNull" ng-class="getWinningCardClass(player.selectedWhiteCardId)">
