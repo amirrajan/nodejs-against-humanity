@@ -77,4 +77,11 @@
             </ul>
         </div>
         <h4>Round Winners</h4>
-        <span>todo</span>
+        <div id="rountWinners" class="row">
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat="item in game.history">
+                    <span class="text-success">{{item.winner}}:&nbsp;</span>
+                    <span ng-bind-html="buildWinningText(item)"></span>
+                </li>
+            </ul>
+        </div>

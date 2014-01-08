@@ -86,8 +86,19 @@ angular.module('myApp.controllers', [])
             return ($scope.currentPlayer.isCzar && $scope.game.isStarted && $scope.game.isReadyForScoring) ||
                 $scope.game.isReadyForReview
         };
-
         //end ng-show helper functions
+
+        $scope.buildWinningText = function(history) {
+            var text = history.black;
+
+            if(text.indexOf("__________") != -1) {
+                text = text.replace("__________", "<b>" + history.white + "</b>");
+            } else {
+                text = text + " <b>" + history.white + "</b>"
+            }
+            return text
+        };
+
         $scope.whiteCardNonNull = function(item) {
             return item.selectedWhiteCardId != undefined;
         }
