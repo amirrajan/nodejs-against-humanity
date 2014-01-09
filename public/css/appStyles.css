@@ -1,4 +1,23 @@
-.blackCard {font-weight: bold; line-height: 25px; color: #FFFFFF; background-color: #2c2c2c;}
+.blackCard {
+  font-weight: bold;
+  font-size: 25px;
+  line-height: 25px;
+  color: #FFFFFF;
+  background-color: #2c2c2c;
+  padding: 20px;
+  text-align: center;
+  border-radius: 5px;
+}
+
 .test1 {background-color: #269abc;}
 .test2 {background-color: #3c763d}
-.whiteCardItems { border-top: darkgray solid 3px; padding-top: 5px; padding-bottom: 5px; }
+
+.whiteCardItems {
+  border-top: darkgray solid 3px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.alert {
+  font-size: 16px;
+}

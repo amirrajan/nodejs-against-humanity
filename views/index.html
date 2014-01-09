@@ -28,12 +28,17 @@
       </ul>
       <form ng-show="inLobby" class="navbar-form navbar-left" role="search">
         <div class="form-group">
-          <input type="text" class="form-control" placeholder="enter name" ng-model="gameSvc.playerName">
+          <input type="text" class="form-control" placeholder="enter your name" ng-model="gameSvc.playerName">
         </div>
       </form>
     </div>
     </nav>
     <div class="container">
+      <div style="margin-left: 15px; margin-right: 15px;" ng-view></div>
+
+      <br/>
+      <br/>
+      <br/>
       <div class="row" style="border: solid 1px silver; padding: 10px; margin: 10px;">
         <div class="col-sm-2">
           <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">
@@ -45,12 +50,9 @@
           <small>This site is not affliated in any way with the official Cards Against Humanities.</small>
           <br/>
           <a href="https://github.com/amirrajan/nodejs-against-humanity">The source is here. I accept pull requests (tech: NodeJS, AngularJS)</a>.
+          <div>Last Release:&nbsp;<span app-version></span></div>
         </div>
       </div>
-      <br>
-      <div ng-view></div>
-      <hr/>
-      <div>comitted:&nbsp;<span app-version></span></div>
     </div>
 
     <!-- In production use:
