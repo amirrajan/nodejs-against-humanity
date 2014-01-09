@@ -112,6 +112,7 @@ app.post('/joingame', function (req, res) {
 app.post('/departgame', function(req, res) {
     Game.departGame(req.body.gameId, req.body.playerId);
     lobbySocket.emit('gameAdded', Game.list());
+    broadcastGame(req.body.gameId);
 });
 
 app.post('/selectcard', function(req, res) {
