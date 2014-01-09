@@ -16,13 +16,7 @@ app.use(express.bodyParser());
 app.use(app.router);
 app.use('/public', express.static('public'));
 
-function json(o, res) {
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.write(JSON.stringify(o));
-  res.end();
-}
-
-function returnGame(gameId, res) { json(gameViewModel(gameId), res); }
+function returnGame(gameId, res) { res.json(gameViewModel(gameId)); }
 
 function broadcastGame(gameId) {
   for(var player in players[gameId]) {
@@ -83,16 +77,14 @@ io.sockets.on('connection', function(socket) {
 });
 app.get('/', routes.index);
 app.get('/views/*', routes.partials);
-//app.get('/', function (req, res) { res.render('index'); });
-//app.get('/game', function (req, res) { res.render('game'); });
-app.get('/list', function (req, res) { json(Game.list(), res); });
-app.get('/listall', function (req, res) { json(Game.listAll(), res); });
+app.get('/list', function (req, res) { res.json(Game.list()); });
+app.get('/listall', function (req, res) { res.json(Game.listAll()); });
 app.post('/add', function (req, res) {
     var newGame = Game.addGame(req.body);
-    json(newGame, res);
+    res.json(newGame);
     lobbySocket.emit('gameAdded', Game.list());
 });
-app.get('/gamebyid', function (req, res) { json(Game.getGame(req.query.id), res); });
+app.get('/gamebyid', function (req, res) { res.json(Game.getGame(req.query.id)); });
 
 app.post('/joingame', function (req, res) {
   var game = Game.getGame(req.body.gameId);
