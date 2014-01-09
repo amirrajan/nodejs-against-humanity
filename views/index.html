@@ -8,9 +8,7 @@
     <link href="/public/css/bootstrap.min.css" rel="stylesheet">
     <link href="/public/css/appStyles.css" rel="stylesheet">
     <style>
-        body {
-            padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-        }
+        body { padding-top: 60px; }
     </style>
 </head>
 <body>
@@ -36,7 +34,7 @@
         </div>
     </nav>
     <div class="container">
-        <div class="row">
+        <div class="row" style="border: solid 1px silver; padding: 10px; margin: 10px;">
             <div class="col-sm-2">
                 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">
                 <img alt="Creative Commons License" style="display: block; margin-left: auto; margin-right: auto;" src="http://i.creativecommons.org/l/by-nc-sa/2.0/88x31.png" /></a>
@@ -45,17 +43,15 @@
                 <small>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic License</a>.</small>
                 <br />
                 <small>This site is not affliated in any way with the official Cards Against Humanities.</small>
+                <br/>
+                <a href="https://github.com/amirrajan/nodejs-against-humanity">The source is here. I accept pull requests (tech: NodeJS, AngularJS)</a>.
             </div>
         </div>
         <br>
         <div ng-view></div>
-        <br>
+        <hr/>
         <div>comitted:&nbsp;<span app-version></span></div>
     </div>
-
-
-
-
 
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>

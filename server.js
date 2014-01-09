@@ -75,6 +75,7 @@ io.sockets.on('connection', function(socket) {
     }
   });
 });
+
 app.get('/', routes.index);
 app.get('/views/*', routes.partials);
 app.get('/list', function (req, res) { res.json(Game.list()); });
