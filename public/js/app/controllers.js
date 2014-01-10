@@ -44,8 +44,8 @@ angular.module('myApp.controllers', [])
 
         var socket;
 
-        $scope.game;
-        $scope.currentPlayer;
+        $scope.game = {};
+        $scope.currentPlayer = {};
         $scope.progStyle = {width: '0%'};
         $scope.gameId = $routeParams.gameId;
         $scope.playerId = $routeParams.playerId;
@@ -188,25 +188,28 @@ angular.module('myApp.controllers', [])
             }
         };
 
+        function renderGame(game) {
+            $scope.game = game;
+            $scope.currentPlayer = _.find(game.players, function(p) {
+                return p.id === $scope.playerId;
+            });
+            setProgStyle();
+        };
+
         function initSocket() {
-            socket = io.connect('/');
+            socket = io.connect('/', {query: 'playerId=' + $routeParams.playerId});
             if(socket.socket.connected){
                 socket.emit('connectToGame', { gameId: $routeParams.gameId, playerId: $routeParams.playerId, playerName: GameService.playerName });
             }
             socket.on('connect', function() {
                 console.info('game socket connect');
-                console.info($routeParams);
                 socket.emit('connectToGame', { gameId: $routeParams.gameId, playerId: $routeParams.playerId, playerName: GameService.playerName });
             });
 
             socket.on('updateGame', function(game) {
                 console.info('updateGame');
                 console.info(game);
-                $scope.game = game;
-                $scope.currentPlayer = _.find(game.players, function(p) {
-                    return p.id === $scope.playerId;
-                });
-                setProgStyle();
+                renderGame(game);
                 $scope.$apply();
             });
 
@@ -215,7 +218,20 @@ angular.module('myApp.controllers', [])
                 $scope.$apply();
             });
         }
-        initSocket();
+
+        function joinGame() {
+            GameService.joinGame($routeParams.gameId, $routeParams.playerId, $routeParams.playerName)
+                .then(function(success) {
+                    renderGame(success.data);
+                    initSocket();
+                },
+              function(error) {
+                $scope.gameError = error.data.error;
+              });
+        };
+
+        joinGame();
+        //initSocket();
         $scope.$emit('enterGame');
 
         $scope.$on('$destroy', function(event) {

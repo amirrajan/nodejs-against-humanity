@@ -46,21 +46,14 @@ io.sockets.on('connection', function(socket) {
         console.info('server: connectToGame');
         var game = Game.getGame(data.gameId);
         if(game){
-            if(game.players.length >= 4){
-                socket.emit('gameError', "Game is Full");
-            } else{
-                //join the game
-                Game.joinGame(game, { id: data.playerId, name: data.playerName });
-                lobbySocket.emit('gameAdded', Game.list());
-                if(!players[data.gameId]) {
-                    players[data.gameId] = { };
-                }
-                socket.gameId = data.gameId;
-                socket.playerId = data.playerId;
-                players[data.gameId][data.playerId] = socket;
-                broadcastGame(data.gameId);
-            }
-          } else {
+          if(!players[data.gameId]) {
+              players[data.gameId] = { };
+          }
+          socket.gameId = data.gameId;
+          socket.playerId = data.playerId;
+          players[data.gameId][data.playerId] = socket;
+          broadcastGame(data.gameId);
+        } else {
             socket.emit('gameError', 'Invalid Game ID');
         }
   });
@@ -89,8 +82,14 @@ app.get('/gamebyid', function (req, res) { res.json(Game.getGame(req.query.id));
 
 app.post('/joingame', function (req, res) {
   var game = Game.getGame(req.body.gameId);
+  if(!game) {
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.write(JSON.stringify({ error: "invalid GameId" }));
+    res.end();
+    return null;
+  }
 
-  if(game.isStarted) {
+  if(game.isStarted || game.players.length >= 4) {
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.write(JSON.stringify({ error: "too many players" }));
     res.end();

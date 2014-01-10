@@ -34,7 +34,7 @@ angular.module('myApp.services', []).
                 return $http.post('/add', { id: guid(), name: this.playerName + "'s game" });
             },
             joinGame: function(gameId, playerId, name) {
-                $http.post("/joingame", { gameId: gameId, playerId: playerId, playerName: name });
+                return $http.post("/joingame", { gameId: gameId, playerId: playerId, playerName: name });
             },
             departGame: function(gameId, playerId) {
                 $http.post('/departgame', { gameId: gameId, playerId: playerId});
