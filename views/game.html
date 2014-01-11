@@ -4,8 +4,7 @@
   </div>
 </div>
 <div class="row">
-  <h1 ng-show="game.isStarted">{{game.name}}</h1>
-  <h1 ng-show="!game.isStarted">{{game.name}} <small>(waiting for players)</h1>
+  <h1 id="gameName">{{game.name}} <small ng-show="!game.isStarted">(waiting for players)</small></h1>
   <hr/>
 </div>
 <div id="notificationWaitingOnRound" ng-show="!game.isStarted" class="center row alert alert-warning">waiting on round to start</div>

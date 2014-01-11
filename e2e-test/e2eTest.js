@@ -13,6 +13,26 @@ describe('node against humanity lobby', function() {
       } else {
         expect(element(by.id('noGames')).isDisplayed()).toBe(false);
       }
-    })
+    });
+
+
+  });
+
+  it('should start the game with the players name when Create Game is clicked and name is entered', function() {
+    element(by.model('gameSvc.playerName')).sendKeys('Chris');
+    element(by.id('aCreatGame')).click();
+
+    expect(element(by.id('gameName')).getText()).toEqual('Chris\'s game (waiting for players)');
+
+    setTimeout(function() {
+      //give the page a second to return results and change the bindings. Not sure if there is a better way to do this
+      expect(element(by.id('notificationCardCzar')).isDisplayed()).toBe(true);
+      expect(element(by.id('notificationSelectCard')).isDisplayed()).toBe(false);
+      expect(element(by.id('notificationWaitingOnCzar')).isDisplayed()).toBe(false);
+      expect(element(by.id('notificationWaitingOnCards')).isDisplayed()).toBe(true);
+      expect(element(by.id('notificationSelectWinner')).isDisplayed()).toBe(false);
+      expect(element(by.id('notificationCardCzar')).isDisplayed()).toBe(false);
+    }, 1000)
+
   });
 });
