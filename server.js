@@ -19,8 +19,9 @@ app.use('/public', express.static('public'));
 function returnGame(gameId, res) { res.json(gameViewModel(gameId)); }
 
 function broadcastGame(gameId) {
+  var vm = gameViewModel(gameId);
   for(var player in players[gameId]) {
-    players[gameId][player].emit("updateGame", gameViewModel(gameId));
+    players[gameId][player].emit("updateGame", vm);
   }
 }
 
