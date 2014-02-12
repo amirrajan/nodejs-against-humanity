@@ -5,10 +5,8 @@
 
 // Demonstrate how to register services
 // In this case it is a simple value service.
-angular.module('myApp.services', []).
-  value('version', 'Jan-9-2014')
-    .factory('GameService', function($http) {
-
+angular.module('myApp.services', [])
+  .factory('GameService', function($http) {
         var s4 = function() {
             return Math.floor(Math.random() * 0x10000).toString();
         }
