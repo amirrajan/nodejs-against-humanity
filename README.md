@@ -26,7 +26,7 @@ To run the E2E tests you first must install protractor. see: https://github.com/
 
 If you want the server to load up everytime you change the back end:
 
-    npm install -g nodemone
+    npm install -g nodemon
 
 Then run the following instead of `node server.js`:
 
