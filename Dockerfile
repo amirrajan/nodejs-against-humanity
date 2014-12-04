@@ -16,8 +16,6 @@ RUN \
 	nvm install v0.10.32 && \
 	n=$(which node);n=${n%/bin/node}; chmod -R 755 $n/bin/*; cp -r $n/{bin,lib,share} /usr/local
 	
-RUN npm install -g gulp
-
 ADD . /var/nodejs-against-humanity
 
 # RUN mkdir -p /root/.ssh
