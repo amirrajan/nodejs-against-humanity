@@ -4,7 +4,8 @@
   "description": "Cards Against Humanities implemented in NodeJS",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test" : "jasmine-node --junitreport spec/"
   },
   "repository": {
     "type": "git",
