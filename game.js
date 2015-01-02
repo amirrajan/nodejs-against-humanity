@@ -16,7 +16,21 @@ function removeFromArray(array, item) {
 
 function list() {
   return toInfo(_.filter(gameList, function(x) {
-    return x.players.length < 4 && !x.isStarted
+    return x.players.length < x.maxPlayers && !x.isStarted
+  }));
+}
+
+function listJoinedGames(playerId) {
+  return toInfo(_.filter(gameList, function(x) {
+	var players = x.previousPlayers;
+	var activePlayers = x.players;
+	if(!players || players.length == 0) return false;
+	for(var i = 0; i < players.length; i++) {
+        if (players[i]['id'] === playerId){ 
+			return !x.isOver;
+		}
+    }
+    return false;
   }));
 }
 
@@ -29,9 +43,10 @@ function toInfo(fullGameList) {
     return { id: game.id, name: game.name, players: game.players.length };
   });
 }
-
 function addGame(game) {
   game.players = [];
+  game.previousPlayers = [];
+  game.maxPlayers = 4;
   game.history = [];
   game.isOver = false;
   game.winnerId = null;
@@ -42,8 +57,10 @@ function addGame(game) {
   game.isReadyForScoring = false;
   game.isReadyForReview = false;
   game.pointsToWin = 5;
+  game.czarIterator = new Iterator(game.players);
   gameList.push(game);
   return game;
+  
 }
 
 function getGame(gameId) {
@@ -91,18 +108,26 @@ function departGame(gameId, playerId) {
         var departingPlayer = _.find(game.players, function(p){
             return p.id === playerId;
         });
+		if(!departingPlayer) return;
+		if(departingPlayer.isCzar)
+			assignCzar(game);
         removeFromArray(game.players, departingPlayer);
+		game.previousPlayers.push(departingPlayer);
         if(game.players.length === 0){
             //kill the game
+			game.isOver = true;
             removeFromArray(gameList, game);
         }
+		if(game.isStarted && game.players.length <= 2){
+			// wait for opponents
+		}
     }
 }
 
 function startGame(game) {
   game.isStarted = true;
   setCurrentBlackCard(game);
-  game.players[0].isCzar = true;
+  assignCzar(game);
 }
 
 function roundEnded(game) {
@@ -123,32 +148,23 @@ function roundEnded(game) {
     player.selectedWhiteCardId = null;
   });
 
-  if(game.players[0].isCzar === true) {
-    game.players[0].isCzar = false;
-    game.players[1].isCzar = true;
-    game.players[1].isReady = false;
-  }
-  else if(game.players[1].isCzar === true) {
-    game.players[1].isCzar = false;
-    game.players[2].isCzar = true;
-    game.players[2].isReady = false;
-  }
-  else if(game.players[2].isCzar === true) {
-    game.players[2].isCzar = false;
-    game.players[3].isCzar = true;
-    game.players[3].isReady = false;
-  }
-  else if(game.players[3].isCzar === true) {
-    game.players[3].isCzar = false;
-    game.players[0].isCzar = true;
-    game.players[0].isReady = false;
-  }
+  assignCzar(game);
     if(game.isOver){
         _.map(game.players, function(p) {
             p.awesomePoints = 0;
         });
         game.isOver = false;
     }
+}
+
+function assignCzar(game){
+	var czar = game.czarIterator.current();
+	if(game.players.length != game.czarIterator.arr.length)
+		game.czarIterator.arr = game.players;
+	var next = game.czarIterator.next();
+	
+	if(czar) czar.isCzar = false;
+	if(next) next.isCzar = true;
 }
 
 function drawWhiteCard(game, player) {
@@ -198,7 +214,7 @@ function selectCard(gameId, playerId, whiteCardId) {
     return x.selectedWhiteCardId;
   });
 
-  if(readyPlayers.length === 3) {
+  if(readyPlayers.length === game.players.length-1) {
     game.isReadyForScoring = true;
   }
 }
@@ -221,7 +237,42 @@ function reset(){
   gameList = [];
 }
 
+
+  
+  function Iterator(arr){
+		this.index = -1;
+		this.arr = arr;
+		this.isEmpty = function(){ return this.arr.length; };
+		this.hasNext = function(){ return this.index <= this.arr.length; };
+		this.hasPrevious = function(){ return this.index > 0; };
+
+		this.current = function(){ return arr[ this["index"] ]; };
+
+		this.next = function(){
+			if(this.hasNext()){
+				this.index = this.index + 1;            
+				return this.current();
+			}else if(!isEmpty()){
+				this.index = 0;
+				return this.current();
+			}
+			return false;
+		};
+
+		this.previous = function(){
+			if(this.hasPrevious()){
+				this.index = this.index - 1
+				return this.current();
+			}else if(!isEmpty()){
+				this.index = this.arr.length-1;
+				return this.current();
+			}
+			return false;
+		};
+	}
+
 exports.list = list;
+exports.listJoinedGames = listJoinedGames;
 exports.listAll = listAll;
 exports.addGame = addGame;
 exports.getGame = getGame;

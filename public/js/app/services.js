@@ -28,6 +28,12 @@ angular.module('myApp.services', [])
             getGames: function() {
                 return $http.get('/list');
             },
+            getJoinedGames: function() {
+                return $http.get('/joinedgames', { params: { playerId: this.playerId }});
+            },
+            getGame: function(gameId) {
+                return $http.get('/gamebyid', { params: { id: gameId }});
+            },
             createGame: function() {
                 return $http.post('/add', { id: guid(), name: this.playerName + "'s game" });
             },
@@ -36,6 +42,9 @@ angular.module('myApp.services', [])
             },
             departGame: function(gameId, playerId) {
                 $http.post('/departgame', { gameId: gameId, playerId: playerId});
+            },
+            departGameByParams: function(gameId, playerId) {
+                $http.post('/departgame', { params: {gameId: gameId, playerId: playerId}});
             },
             selectCard: function(gameId, playerId, selectedCard){
                 $http.post("/selectCard", { gameId: gameId, playerId: playerId, whiteCardId: selectedCard });
