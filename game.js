@@ -68,34 +68,45 @@ function getGame(gameId) {
 }
 
 function joinGame(game, player) {
-    var joiningPlayer = {
-    id: player.id,
-    name: player.name,
-    isReady: false,
-    cards : [],
-    selectedWhiteCardId: null,
-    awesomePoints: 0,
-    isCzar: false
-    };
+	var existingPlayer = game.previousPlayers.length > 0 ? _.find(game.previousPlayers, function(p) {
+						return p.id === player.id;
+					}) : false;
+    var joiningPlayer = existingPlayer || {
+		id: player.id,
+		name: player.name,
+		isReady: false,
+		cards : [],
+		selectedWhiteCardId: null,
+		awesomePoints: 0,
+		isCzar: false
+		};
 
-    for(var i = 0; i < 7; i++) {
-        drawWhiteCard(game, joiningPlayer);
-    }
+	if(joiningPlayer.cards.length == 0 && !joiningPlayer.isCzar){
+		for(var i = 0; i < 7; i++) {
+			drawWhiteCard(game, joiningPlayer);
+		}
+	}
+	
+	if(!existingPlayer)
+		joiningPlayer.position = game.players.length;
+	
+	if(joiningPlayer.position >= 0 && joiningPlayer.position <= game.players.length){
+		game.players.splice(joiningPlayer.position, 0, joiningPlayer);
+	}else{
+		game.players.push(joiningPlayer);
+	}
 
-    game.players.push(joiningPlayer);
-
-    if(game.players.length === 4) {
+    if(game.players.length === game.maxPlayers) {
         if(!game.isStarted){
             startGame(game);
-        } else {
-            //someone may have dropped and rejoined. If it was the Czar, we need to re-elect the re-joining player
-            var currentCzar = _.find(game.players, function(p) {
-                return p.isCzar == true;
-            });
-            if(!currentCzar){
-                game.players[game.players.length - 1].isCzar = true;
-            }
-        }
+        }else{
+			if(joiningPlayer.isCzar){
+				var currentCzar = game.czarIterator.current();
+				if(currentCzar) currentCzar.isCzar = false;
+			}
+			game.czarIterator.arr = game.players;
+			game.czarIterator.index = joiningPlayer.position;
+		}
     }
 
     return game;
@@ -108,11 +119,21 @@ function departGame(gameId, playerId) {
         var departingPlayer = _.find(game.players, function(p){
             return p.id === playerId;
         });
+		var previouslyDeparted = _.find(game.previousPlayers, function(p){
+            return p.id === playerId;
+        }) || false;
 		if(!departingPlayer) return;
+		
+		if(previouslyDeparted)
+			previouslyDeparted = _(departingPlayer).clone();
+		else
+			game.previousPlayers.push(_(departingPlayer).clone());
+			
 		if(departingPlayer.isCzar)
 			assignCzar(game);
+			
         removeFromArray(game.players, departingPlayer);
-		game.previousPlayers.push(departingPlayer);
+				
         if(game.players.length === 0){
             //kill the game
 			game.isOver = true;
@@ -242,17 +263,17 @@ function reset(){
   function Iterator(arr){
 		this.index = -1;
 		this.arr = arr;
-		this.isEmpty = function(){ return this.arr.length; };
-		this.hasNext = function(){ return this.index <= this.arr.length; };
-		this.hasPrevious = function(){ return this.index > 0; };
+		this.isEmpty = function(){ return this.arr.length == 0; };
+		this.hasNext = function(){ return this.index < this.arr.length; };
+		this.hasPrevious = function(){ return this.index >= 0; };
 
-		this.current = function(){ return arr[ this["index"] ]; };
+		this.current = function(){ return this.arr[ this["index"] ]; };
 
 		this.next = function(){
-			if(this.hasNext()){
-				this.index = this.index + 1;            
+			this.index += 1; 
+			if(this.hasNext()){       
 				return this.current();
-			}else if(!isEmpty()){
+			}else if(!this.isEmpty()){
 				this.index = 0;
 				return this.current();
 			}
@@ -260,10 +281,10 @@ function reset(){
 		};
 
 		this.previous = function(){
+			this.index -= 1;
 			if(this.hasPrevious()){
-				this.index = this.index - 1
 				return this.current();
-			}else if(!isEmpty()){
+			}else if(!this.isEmpty()){
 				this.index = this.arr.length-1;
 				return this.current();
 			}

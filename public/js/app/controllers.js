@@ -61,13 +61,7 @@ angular.module('myApp.controllers', ['webStorageModule'])
 
         var socket;
 
-        $scope.game = {};
-        $scope.currentPlayer = {};
-        $scope.progStyle = {width: '0%'};
-        $scope.gameId = $routeParams.gameId;
-        $scope.playerId = $routeParams.playerId;
-		$scope.gameSvc.playerName = $routeParams.playerName;
-        $scope.gameError;
+        
 
         //ng-show helper functions
         $scope.showNotificationSelectCard = function() {
@@ -208,9 +202,19 @@ angular.module('myApp.controllers', ['webStorageModule'])
             $scope.game = game;
             $scope.currentPlayer = _.find(game.players, function(p) {
                 return p.id === $scope.playerId;
-            });
+            }) || {};
             setProgStyle();
         };
+		
+		function init(){
+			$scope.game = {};
+			$scope.currentPlayer = {};
+			$scope.progStyle = {width: '0%'};
+			$scope.gameId = $routeParams.gameId;
+			$scope.playerId = GameService.playerId;
+			$scope.gameSvc.playerName = $routeParams.playerName;
+			$scope.gameError;
+		}
 
         function initSocket() {
             socket = io.connect('/', {query: 'playerId=' + $routeParams.playerId});
@@ -236,34 +240,21 @@ angular.module('myApp.controllers', ['webStorageModule'])
         }
 
         function joinGame() {
-			GameService.getGame($scope.gameId)
-                .then(function(success) {
-                    var game = success.data;
-					var playerExists = false;
-                    var playerExists = game.players.length > 0 ? _.find(game.players, function(p) {
-						return p.id === $scope.playerId;
-					}) : false;
-					if(playerExists){
-						init(game);
-					}else{
-						GameService.joinGame($scope.gameId, $scope.playerId, GameService.playerName)
-							.then(function(success) {
-								init(success.data);
-							},
-						  function(error) {
-							$scope.gameError = error.data.error;
-						  });
-					  }
-				});
+			init();
+			GameService.joinGame($scope.gameId, $scope.playerId, GameService.playerName)
+				.then(function(success) {
+					renderGame(success.data);
+					initSocket();
+				},
+			  function(error) {
+				$scope.gameError = error.data.error;
+			  });
+		 
+				
         
 			
         };
 		
-		function init(game){
-			renderGame(game);
-			initSocket();
-			$scope.game.disconnected = false;
-		}
 
         joinGame();
         //initSocket();

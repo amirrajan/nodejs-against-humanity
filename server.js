@@ -20,7 +20,6 @@ function returnGame(gameId, res) { res.json(gameViewModel(gameId)); }
 
 function broadcastGame(gameId) {
   var vm = gameViewModel(gameId);
-  if(!vm) return;
   for(var player in players[gameId]) {
     players[gameId][player].emit("updateGame", vm);
   }
@@ -28,7 +27,6 @@ function broadcastGame(gameId) {
 
 function gameViewModel(gameId) {
   var game = Game.getGame(gameId);
-  if(!game) return;
   var viewModel = JSON.parse(JSON.stringify(game));
   delete viewModel.deck;
   return viewModel;
