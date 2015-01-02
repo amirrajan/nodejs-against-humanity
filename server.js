@@ -20,6 +20,7 @@ function returnGame(gameId, res) { res.json(gameViewModel(gameId)); }
 
 function broadcastGame(gameId) {
   var vm = gameViewModel(gameId);
+  if(!vm) return;
   for(var player in players[gameId]) {
     players[gameId][player].emit("updateGame", vm);
   }
@@ -27,6 +28,7 @@ function broadcastGame(gameId) {
 
 function gameViewModel(gameId) {
   var game = Game.getGame(gameId);
+  if(!game) return undefined;
   var viewModel = JSON.parse(JSON.stringify(game));
   delete viewModel.deck;
   return viewModel;
@@ -106,10 +108,18 @@ app.post('/joingame', function (req, res) {
 app.post('/departgame', function(req, res) {
 	var gameId = req.body.gameId || req.query.gameId;
 	var playerId = req.body.playerId || req.query.playerId;
-    Game.departGame(gameId, playerId);
-    lobbySocket.emit('gameAdded', Game.list());
-	lobbySocket.emit('leftGame', Game.listJoinedGames());
-    broadcastGame(gameId);
+	var game = Game.getGame(gameId);
+	if(!game) {
+		res.writeHead(404, { 'Content-Type': 'application/json' });
+		res.write(JSON.stringify({ error: "g" }));
+		res.end();
+		return null;
+	}
+	
+    game = Game.departGame(game, playerId);
+	returnGame(gameId, res);
+	broadcastGame(gameId);
+	
 });
 
 app.post('/selectcard', function(req, res) {

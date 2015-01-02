@@ -108,41 +108,40 @@ function joinGame(game, player) {
 			game.czarIterator.index = joiningPlayer.position;
 		}
     }
-
+	removeFromArray(game.previousPlayers, existingPlayer);
     return game;
 }
 
-function departGame(gameId, playerId) {
-    var game = getGame(gameId);
-    if(game){
-        console.info('depart game: ' + game.name);
-        var departingPlayer = _.find(game.players, function(p){
-            return p.id === playerId;
-        });
-		var previouslyDeparted = _.find(game.previousPlayers, function(p){
-            return p.id === playerId;
-        }) || false;
-		if(!departingPlayer) return;
+function departGame(game, playerId) {
+    console.info('depart game: ' + game.name);
+	var departingPlayer = _.find(game.players, function(p){
+		return p.id === playerId;
+	});
+	var previouslyDeparted = _.find(game.previousPlayers, function(p){
+		return p.id === playerId;
+	}) || false;
+	if(!departingPlayer) return;
+	
+	if(previouslyDeparted)
+		previouslyDeparted = _(departingPlayer).clone();
+	else
+		game.previousPlayers.push(_(departingPlayer).clone());
 		
-		if(previouslyDeparted)
-			previouslyDeparted = _(departingPlayer).clone();
-		else
-			game.previousPlayers.push(_(departingPlayer).clone());
+	if(departingPlayer.isCzar)
+		assignCzar(game);
+		
+	removeFromArray(game.players, departingPlayer);
 			
-		if(departingPlayer.isCzar)
-			assignCzar(game);
-			
-        removeFromArray(game.players, departingPlayer);
-				
-        if(game.players.length === 0){
-            //kill the game
-			game.isOver = true;
-            removeFromArray(gameList, game);
-        }
-		if(game.isStarted && game.players.length <= 2){
-			// wait for opponents
-		}
-    }
+	if(game.players.length === 0){
+		//kill the game
+		game.isOver = true;
+		removeFromArray(gameList, game);
+	}
+	if(game.isStarted && game.players.length <= 2){
+		// wait for opponents
+	}
+	
+	return game;
 }
 
 function startGame(game) {
@@ -152,30 +151,30 @@ function startGame(game) {
 }
 
 function roundEnded(game) {
-  game.winnerId = null;
-  game.winningCardId = null;
-  game.isReadyForScoring = false;
-  game.isReadyForReview = false;
+	game.winnerId = null;
+	game.winningCardId = null;
+	game.isReadyForScoring = false;
+	game.isReadyForReview = false;
 
-  setCurrentBlackCard(game);
+	setCurrentBlackCard(game);
 
-  _.each(game.players, function(player) {
-    if(!player.isCzar) {
-      removeFromArray(player.cards, player.selectedWhiteCardId);
-      drawWhiteCard(game, player);
-    }
+	_.each(game.players, function(player) {
+	if(!player.isCzar) {
+	  removeFromArray(player.cards, player.selectedWhiteCardId);
+	  drawWhiteCard(game, player);
+	}
 
-    player.isReady = false;
-    player.selectedWhiteCardId = null;
-  });
+	player.isReady = false;
+	player.selectedWhiteCardId = null;
+	});
 
-  assignCzar(game);
-    if(game.isOver){
-        _.map(game.players, function(p) {
-            p.awesomePoints = 0;
-        });
-        game.isOver = false;
-    }
+	assignCzar(game);
+	if(game.isOver){
+		_.map(game.players, function(p) {
+			p.awesomePoints = 0;
+		});
+		game.isOver = false;
+	}
 }
 
 function assignCzar(game){

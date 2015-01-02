@@ -41,10 +41,7 @@ angular.module('myApp.services', [])
                 return $http.post("/joingame", { gameId: gameId, playerId: playerId, playerName: name });
             },
             departGame: function(gameId, playerId) {
-                $http.post('/departgame', { gameId: gameId, playerId: playerId});
-            },
-            departGameByParams: function(gameId, playerId) {
-                $http.post('/departgame', { params: {gameId: gameId, playerId: playerId}});
+                $http.post('/departgame', { gameId: gameId, playerId: playerId}, {unique: true, requestId: 'depart-game'});
             },
             selectCard: function(gameId, playerId, selectedCard){
                 $http.post("/selectCard", { gameId: gameId, playerId: playerId, whiteCardId: selectedCard });
