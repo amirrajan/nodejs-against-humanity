@@ -113,7 +113,12 @@ function joinGame(game, player) {
 }
 
 function departGame(game, playerId) {
-    console.info('depart game: ' + game.name);
+	if(typeof game === 'string'){
+		console.info('depart game: getting game from id: ' + game);
+		var id = game;
+		game = getGame(id);
+	}
+    console.info('depart game: ' + game.id);
 	var departingPlayer = _.find(game.players, function(p){
 		return p.id === playerId;
 	});

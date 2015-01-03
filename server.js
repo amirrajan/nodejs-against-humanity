@@ -66,7 +66,9 @@ io.sockets.on('connection', function(socket) {
     if(socket.playerId && socket.gameId){
         console.info('socket disconnect ' + socket.playerId);
         delete players[socket.gameId][socket.playerId];
-        Game.departGame(socket.gameId, socket.playerId);
+		
+		Game.departGame(socket.gameId, socket.playerId);
+		broadcastGame(socket.gameId);
         lobbySocket.emit('gameAdded', Game.list());
     }
   });
@@ -110,7 +112,8 @@ app.post('/departgame', function(req, res) {
 	var playerId = req.body.playerId || req.query.playerId;
 	var game = Game.getGame(gameId);
 	if(!game) {
-		res.writeHead(404, { 'Content-Type': 'application/json' });
+		// game doesn't exist anymore
+		res.writeHead(410, { 'Content-Type': 'application/json' });
 		res.write(JSON.stringify({ error: "g" }));
 		res.end();
 		return null;
