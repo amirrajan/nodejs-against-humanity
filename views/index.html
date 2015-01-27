@@ -24,7 +24,7 @@
     </div>
     <div class="navbar-collapse collapse" id="humanity-navbar-collapse">
       <ul class="nav navbar-nav">
-        <li id="aCreatGame" ng-show="inLobby"><a href="" ng-click="createGame()">Create Game</a></li>
+        <li id="aCreatGame" ng-show="inLobby"><button class="btn btn-primary navbar-btn" ng-click="createGame()">Create Game</button></li>
       </ul>
       <form ng-show="inLobby" class="navbar-form navbar-left" role="search">
         <div class="form-group">
@@ -62,6 +62,8 @@
     <script src="public/lib/angular/angular-resource.min.js"></script>
     <script src="public/lib/angular/angular-route.min.js"></script>
     <script src="public/lib/angular/angular-sanitize.min.js"></script>
+    <script src="public/lib/angular/angular-webstorage/angular-webstorage.min.js"></script>
+    <script src="public/lib/angular/angular-webstorage/angular-webstorage-utils.js"></script>
     <script src="public/js/app/angular_app.js"></script>
     <script src="public/js/app/services.js"></script>
     <script src="public/js/app/controllers.js"></script>

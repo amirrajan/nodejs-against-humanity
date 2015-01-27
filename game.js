@@ -16,7 +16,21 @@ function removeFromArray(array, item) {
 
 function list() {
   return toInfo(_.filter(gameList, function(x) {
-    return x.players.length < 4 && !x.isStarted
+    return x.players.length < x.maxPlayers && !x.isStarted
+  }));
+}
+
+function listJoinedGames(playerId) {
+  return toInfo(_.filter(gameList, function(x) {
+	var players = x.previousPlayers;
+	var activePlayers = x.players;
+	if(!players || players.length == 0) return false;
+	for(var i = 0; i < players.length; i++) {
+        if (players[i]['id'] === playerId){ 
+			return !x.isOver;
+		}
+    }
+    return false;
   }));
 }
 
@@ -29,9 +43,10 @@ function toInfo(fullGameList) {
     return { id: game.id, name: game.name, players: game.players.length };
   });
 }
-
 function addGame(game) {
   game.players = [];
+  game.previousPlayers = [];
+  game.maxPlayers = 4;
   game.history = [];
   game.isOver = false;
   game.winnerId = null;
@@ -42,8 +57,10 @@ function addGame(game) {
   game.isReadyForScoring = false;
   game.isReadyForReview = false;
   game.pointsToWin = 5;
+  game.czarIterator = new Iterator(game.players);
   gameList.push(game);
   return game;
+  
 }
 
 function getGame(gameId) {
@@ -51,104 +68,128 @@ function getGame(gameId) {
 }
 
 function joinGame(game, player) {
-    var joiningPlayer = {
-    id: player.id,
-    name: player.name,
-    isReady: false,
-    cards : [],
-    selectedWhiteCardId: null,
-    awesomePoints: 0,
-    isCzar: false
-    };
+	var existingPlayer = game.previousPlayers.length > 0 ? _.find(game.previousPlayers, function(p) {
+						return p.id === player.id;
+					}) : false;
+    var joiningPlayer = existingPlayer || {
+		id: player.id,
+		name: player.name,
+		isReady: false,
+		cards : [],
+		selectedWhiteCardId: null,
+		awesomePoints: 0,
+		isCzar: false
+		};
 
-    for(var i = 0; i < 7; i++) {
-        drawWhiteCard(game, joiningPlayer);
-    }
+	if(joiningPlayer.cards.length == 0 && !joiningPlayer.isCzar){
+		for(var i = 0; i < 7; i++) {
+			drawWhiteCard(game, joiningPlayer);
+		}
+	}
+	
+	if(!existingPlayer)
+		joiningPlayer.position = game.players.length;
+	
+	if(joiningPlayer.position >= 0 && joiningPlayer.position <= game.players.length){
+		game.players.splice(joiningPlayer.position, 0, joiningPlayer);
+	}else{
+		game.players.push(joiningPlayer);
+	}
 
-    game.players.push(joiningPlayer);
-
-    if(game.players.length === 4) {
+    if(game.players.length === game.maxPlayers) {
         if(!game.isStarted){
             startGame(game);
-        } else {
-            //someone may have dropped and rejoined. If it was the Czar, we need to re-elect the re-joining player
-            var currentCzar = _.find(game.players, function(p) {
-                return p.isCzar == true;
-            });
-            if(!currentCzar){
-                game.players[game.players.length - 1].isCzar = true;
-            }
-        }
+        }else{
+			if(joiningPlayer.isCzar){
+				var currentCzar = game.czarIterator.current();
+				if(currentCzar) currentCzar.isCzar = false;
+			}
+			game.czarIterator.arr = game.players;
+			game.czarIterator.index = joiningPlayer.position;
+		}
     }
-
+	removeFromArray(game.previousPlayers, existingPlayer);
     return game;
 }
 
-function departGame(gameId, playerId) {
-    var game = getGame(gameId);
-    if(game){
-        console.info('depart game: ' + game.name);
-        var departingPlayer = _.find(game.players, function(p){
-            return p.id === playerId;
-        });
-        removeFromArray(game.players, departingPlayer);
-        if(game.players.length === 0){
-            //kill the game
-            removeFromArray(gameList, game);
-        }
-    }
+function departGame(game, playerId) {
+	if(typeof game === 'string'){
+		console.info('depart game: getting game from id: ' + game);
+		var id = game;
+		game = getGame(id);
+	}
+    console.info('depart game: ' + game.id);
+	var departingPlayer = _.find(game.players, function(p){
+		return p.id === playerId;
+	});
+	var previouslyDeparted = _.find(game.previousPlayers, function(p){
+		return p.id === playerId;
+	}) || false;
+	if(!departingPlayer) return;
+	
+	if(previouslyDeparted)
+		previouslyDeparted = _(departingPlayer).clone();
+	else
+		game.previousPlayers.push(_(departingPlayer).clone());
+		
+	if(departingPlayer.isCzar)
+		assignCzar(game);
+		
+	removeFromArray(game.players, departingPlayer);
+			
+	if(game.players.length === 0){
+		//kill the game
+		game.isOver = true;
+		removeFromArray(gameList, game);
+	}
+	if(game.isStarted && game.players.length <= 2){
+		// wait for opponents
+	}
+	
+	return game;
 }
 
 function startGame(game) {
   game.isStarted = true;
   setCurrentBlackCard(game);
-  game.players[0].isCzar = true;
+  assignCzar(game);
 }
 
 function roundEnded(game) {
-  game.winnerId = null;
-  game.winningCardId = null;
-  game.isReadyForScoring = false;
-  game.isReadyForReview = false;
+	game.winnerId = null;
+	game.winningCardId = null;
+	game.isReadyForScoring = false;
+	game.isReadyForReview = false;
 
-  setCurrentBlackCard(game);
+	setCurrentBlackCard(game);
 
-  _.each(game.players, function(player) {
-    if(!player.isCzar) {
-      removeFromArray(player.cards, player.selectedWhiteCardId);
-      drawWhiteCard(game, player);
-    }
+	_.each(game.players, function(player) {
+	if(!player.isCzar) {
+	  removeFromArray(player.cards, player.selectedWhiteCardId);
+	  drawWhiteCard(game, player);
+	}
 
-    player.isReady = false;
-    player.selectedWhiteCardId = null;
-  });
+	player.isReady = false;
+	player.selectedWhiteCardId = null;
+	});
 
-  if(game.players[0].isCzar === true) {
-    game.players[0].isCzar = false;
-    game.players[1].isCzar = true;
-    game.players[1].isReady = false;
-  }
-  else if(game.players[1].isCzar === true) {
-    game.players[1].isCzar = false;
-    game.players[2].isCzar = true;
-    game.players[2].isReady = false;
-  }
-  else if(game.players[2].isCzar === true) {
-    game.players[2].isCzar = false;
-    game.players[3].isCzar = true;
-    game.players[3].isReady = false;
-  }
-  else if(game.players[3].isCzar === true) {
-    game.players[3].isCzar = false;
-    game.players[0].isCzar = true;
-    game.players[0].isReady = false;
-  }
-    if(game.isOver){
-        _.map(game.players, function(p) {
-            p.awesomePoints = 0;
-        });
-        game.isOver = false;
-    }
+	assignCzar(game);
+	if(game.isOver){
+		_.map(game.players, function(p) {
+			p.awesomePoints = 0;
+		});
+		game.isOver = false;
+	}
+}
+
+function assignCzar(game){
+	var czar = game.czarIterator.current();
+	if(game.players.length != game.czarIterator.arr.length)
+		game.czarIterator.arr = game.players;
+	var next = game.czarIterator.next();
+	
+	if(czar) czar.isCzar = false;
+	if(next) next.isCzar = true;
 }
 
 function drawWhiteCard(game, player) {
@@ -198,7 +239,7 @@ function selectCard(gameId, playerId, whiteCardId) {
     return x.selectedWhiteCardId;
   });
 
-  if(readyPlayers.length === 3) {
+  if(readyPlayers.length === game.players.length-1) {
     game.isReadyForScoring = true;
   }
 }
@@ -221,7 +262,42 @@ function reset(){
   gameList = [];
 }
 
+
+  
+  function Iterator(arr){
+		this.index = -1;
+		this.arr = arr;
+		this.isEmpty = function(){ return this.arr.length == 0; };
+		this.hasNext = function(){ return this.index < this.arr.length; };
+		this.hasPrevious = function(){ return this.index >= 0; };
+
+		this.current = function(){ return this.arr[ this["index"] ]; };
+
+		this.next = function(){
+			this.index += 1; 
+			if(this.hasNext()){       
+				return this.current();
+			}else if(!this.isEmpty()){
+				this.index = 0;
+				return this.current();
+			}
+			return false;
+		};
+
+		this.previous = function(){
+			this.index -= 1;
+			if(this.hasPrevious()){
+				return this.current();
+			}else if(!this.isEmpty()){
+				this.index = this.arr.length-1;
+				return this.current();
+			}
+			return false;
+		};
+	}
+
 exports.list = list;
+exports.listJoinedGames = listJoinedGames;
 exports.listAll = listAll;
 exports.addGame = addGame;
 exports.getGame = getGame;

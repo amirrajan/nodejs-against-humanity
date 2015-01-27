@@ -2,15 +2,31 @@
 
 /* Controllers */
 
-angular.module('myApp.controllers', [])
-    .controller('HomeCtrl', function($scope, $location, GameService) {
+angular.module('myApp.controllers', ['webStorageModule'])
+    .controller('HomeCtrl', function($scope, $location, GameService, webStorage) {
         console.info('HomeCtrl loaded');
 
         var handleError = function(err) {
             console.error(err);
         };
-
+		
+		var sessionPlayerId = webStorage.get('playerId');
+		var sessionPlayerName = webStorage.get('playerName');
+		
+		if(!sessionPlayerId){
+			webStorage.add('playerId', GameService.playerId);
+		}else{
+			GameService.playerId = webStorage.get('playerId');
+		}
+			
+		if(!sessionPlayerName){
+			webStorage.add('playerName', GameService.playerName);
+		}else{
+			GameService.playerName = webStorage.get('playerName');
+		}
+		
         $scope.gameSvc = GameService;
+		
         $scope.inLobby = true;
 
         $scope.createGame = function() {
@@ -23,10 +39,11 @@ angular.module('myApp.controllers', [])
                     $scope.joinGame(success.data.id);
                 }, handleError);
         };
-
-        $scope.joinGame = function(gameId) {
+		
+		$scope.joinGame = function(gameId) {
             console.info('joinGame called for gameId ' + gameId);
             GameService.initName();
+			webStorage.add('playerName', GameService.playerName);
             $location.url("/game/"+ gameId + "/pId/" + GameService.playerId + "/name/" + GameService.playerName);
         };
 
@@ -44,14 +61,7 @@ angular.module('myApp.controllers', [])
 
         var socket;
 
-        $scope.game = {};
-        $scope.currentPlayer = {};
-        $scope.progStyle = {width: '0%'};
-        $scope.gameId = $routeParams.gameId;
-        $scope.playerId = $routeParams.playerId;
-        $scope.gameError;
-
-        GameService.playerName = $routeParams.playerName;
+        
 
         //ng-show helper functions
         $scope.showNotificationSelectCard = function() {
@@ -192,9 +202,19 @@ angular.module('myApp.controllers', [])
             $scope.game = game;
             $scope.currentPlayer = _.find(game.players, function(p) {
                 return p.id === $scope.playerId;
-            });
+            }) || {};
             setProgStyle();
         };
+		
+		function init(){
+			$scope.game = {};
+			$scope.currentPlayer = {};
+			$scope.progStyle = {width: '0%'};
+			$scope.gameId = $routeParams.gameId;
+			$scope.playerId = GameService.playerId;
+			$scope.gameSvc.playerName = $routeParams.playerName;
+			$scope.gameError;
+		}
 
         function initSocket() {
             socket = io.connect('/', {query: 'playerId=' + $routeParams.playerId});
@@ -220,15 +240,21 @@ angular.module('myApp.controllers', [])
         }
 
         function joinGame() {
-            GameService.joinGame($routeParams.gameId, $routeParams.playerId, $routeParams.playerName)
-                .then(function(success) {
-                    renderGame(success.data);
-                    initSocket();
-                },
-              function(error) {
-                $scope.gameError = error.data.error;
-              });
+			init();
+			GameService.joinGame($scope.gameId, $scope.playerId, GameService.playerName)
+				.then(function(success) {
+					renderGame(success.data);
+					initSocket();
+				},
+			  function(error) {
+				$scope.gameError = error.data.error;
+			  });
+		 
+				
+        
+			
         };
+		
 
         joinGame();
         //initSocket();
@@ -237,15 +263,16 @@ angular.module('myApp.controllers', [])
         $scope.$on('$destroy', function(event) {
             console.info('leaving GameCtrl');
             if($scope.game){
-                GameService.departGame($scope.game.id, $scope.playerId);
+				GameService.departGame($scope.game.id, $scope.playerId);
             }
         });
     })
-    .controller('LobbyCtrl', function($scope, $location, GameService) {
+    .controller('LobbyCtrl', function($scope, $location, GameService, webStorage) {
         console.info('LobbyCtrl loaded');
         var socket;
 
         $scope.availableGames = [];
+		$scope.joinedGames = [];
         $scope.creatingGame = false;
         $scope.gameSvc = GameService;
 
@@ -257,11 +284,21 @@ angular.module('myApp.controllers', [])
                     $scope.availableGames = games;
             });
         };
-
+		
+		$scope.getJoinedGames = function() {
+            GameService.getJoinedGames()
+                .then(function(success) {
+                    var games = success.data;
+                    console.info('getJoinedGames returned ' + games.length + ' items');
+                    $scope.joinedGames = games;
+            });
+        };
+		
         function initSocket() {
             socket = io.connect('/lobby');
             if(socket.socket.connected){
                 $scope.getGames();
+				$scope.getJoinedGames();
             }
             socket.on('connect', function() {
                 console.info('lobby socket connect');
@@ -277,6 +314,13 @@ angular.module('myApp.controllers', [])
                 console.info('gameAdded');
                 console.info(gameList);
                 $scope.availableGames = gameList;
+                $scope.$apply();
+            });
+			
+			socket.on('leftGame', function(gameList) {
+                console.info('leftGame');
+                console.info(gameList);
+                $scope.joinedGames = gameList;
                 $scope.$apply();
             });
         }

@@ -6,9 +6,19 @@
   <li>click below to join a game.</li>
 </ul>
 <hr />
+<div class="row" id="joinedGames" ng-hide="joinedGames.length == 0">
+	<div class="col-lg-10">
+		<h2>Joined Games</h2>
+		<div ng-repeat="game in joinedGames" class="well">
+		  <button ng-click="joinGame(game.id)" type="button" class="btn btn-primary" style="margin-right: 10px;">Re-Join Game</button>
+		  <span style="font-size: larger">{{game.name}} - {{game.players}} of 4 players</span>
+		</div>
+	</div>
+</div>
 <div class="row" id="availableGames" >
   <div class="col-lg-10">
-    <strong id="noGames" ng-show="availableGames.length == 0">no open games... use the Create Game link at the top to start one.</strong>
+	<h2>Available Games</h2>
+	<div class="alert alert-info" role="alert" ng-show="availableGames.length == 0">There are no open games. <button class="btn btn-default" ng-click="createGame()">Create Game</button></div>
     <div ng-repeat="game in availableGames" class="well">
       <button ng-click="joinGame(game.id)" type="button" class="btn btn-primary" style="margin-right: 10px;">Join Game</button>
       <span style="font-size: larger">{{game.name}} - {{game.players}} of 4 players</span>
