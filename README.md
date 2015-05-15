@@ -32,6 +32,12 @@ Then run the following instead of `node server.js`:
 
     nodemon server.js
 
+##Deploy to Gitdeploy
+
+See this app live in action by deploying it to [Gitdeploy.io](https://gitdeploy.io):
+
+[![Deploy nodejs-against-humanity via gitdeploy.io](https://img.shields.io/badge/gitdeploy.io-deploy%20nodejs--against--humanity/master-green.svg)](https://www.gitdeploy.io/deploy?repository=https%3A%2F%2Fgithub.com%2Famirrajan%2Fnodejs-against-humanity.git)
+
 ##Signing up, and deploying to Nodejitsu
 
 ###Documentation
