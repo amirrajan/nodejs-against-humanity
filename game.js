@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var cards = require('./cards.js');
+var config = require('./config.js');
 
 var gameList = [];
 
@@ -16,7 +17,8 @@ function removeFromArray(array, item) {
 
 function list() {
   return toInfo(_.filter(gameList, function(x) {
-    return x.players.length < 4 && !x.isStarted
+    // XXX: Not sure what this is for
+    return x.players.length < config.minPlayers && !x.isStarted
   }));
 }
 
@@ -61,12 +63,13 @@ function joinGame(game, player) {
     isCzar: false
     };
 
-    for(var i = 0; i < 7; i++) {
+    for(var i = 0; i < config.whiteCardsPerHand; i++) {
         drawWhiteCard(game, joiningPlayer);
     }
 
     game.players.push(joiningPlayer);
 
+    // Need to add a start game button, not just start automatically
     if(game.players.length === 4) {
         if(!game.isStarted){
             startGame(game);
@@ -123,6 +126,7 @@ function roundEnded(game) {
     player.selectedWhiteCardId = null;
   });
 
+  // create a function to rotate through the players
   if(game.players[0].isCzar === true) {
     game.players[0].isCzar = false;
     game.players[1].isCzar = true;
@@ -198,7 +202,7 @@ function selectCard(gameId, playerId, whiteCardId) {
     return x.selectedWhiteCardId;
   });
 
-  if(readyPlayers.length === 3) {
+  if(readyPlayers.length === game.players.length - 1) {
     game.isReadyForScoring = true;
   }
 }
