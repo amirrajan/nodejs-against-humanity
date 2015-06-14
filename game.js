@@ -43,7 +43,7 @@ function addGame(game) {
   game.currentBlackCard = "";
   game.isReadyForScoring = false;
   game.isReadyForReview = false;
-  game.pointsToWin = 5;
+  game.pointsToWin = config.pointsToWin;
   gameList.push(game);
   return game;
 }

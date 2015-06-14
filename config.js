@@ -7,4 +7,6 @@ config.maxPlayers = 10;
 
 config.whiteCardsPerHand = 7;
 
+config.pointsToWin = 5;
+
 module.exports = config;
