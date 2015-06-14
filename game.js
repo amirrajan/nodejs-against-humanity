@@ -70,7 +70,7 @@ function joinGame(game, player) {
     game.players.push(joiningPlayer);
 
     // Need to add a start game button, not just start automatically
-    if(game.players.length === 4) {
+    if(game.players.length === config.minPlayers) {
         if(!game.isStarted){
             startGame(game);
         } else {
@@ -108,6 +108,18 @@ function startGame(game) {
   game.players[0].isCzar = true;
 }
 
+function selectCardCzar(game) {
+  for (var i = 0; i < game.players.length; i++) {
+    if (game.players[i].isCzar === true) {
+      game.players[i].isCzar = false;
+      var nextCzar = (i + 1) % game.players.length;
+      game.players[nextCzar].isCzar = true;
+      game.players[nextCzar].isReady = false;
+      return;
+    }
+  }
+}
+
 function roundEnded(game) {
   game.winnerId = null;
   game.winningCardId = null;
@@ -127,32 +139,14 @@ function roundEnded(game) {
   });
 
   // create a function to rotate through the players
-  if(game.players[0].isCzar === true) {
-    game.players[0].isCzar = false;
-    game.players[1].isCzar = true;
-    game.players[1].isReady = false;
+  selectCardCzar(game);
+
+  if(game.isOver){
+    _.map(game.players, function(p) {
+        p.awesomePoints = 0;
+    });
+    game.isOver = false;
   }
-  else if(game.players[1].isCzar === true) {
-    game.players[1].isCzar = false;
-    game.players[2].isCzar = true;
-    game.players[2].isReady = false;
-  }
-  else if(game.players[2].isCzar === true) {
-    game.players[2].isCzar = false;
-    game.players[3].isCzar = true;
-    game.players[3].isReady = false;
-  }
-  else if(game.players[3].isCzar === true) {
-    game.players[3].isCzar = false;
-    game.players[0].isCzar = true;
-    game.players[0].isReady = false;
-  }
-    if(game.isOver){
-        _.map(game.players, function(p) {
-            p.awesomePoints = 0;
-        });
-        game.isOver = false;
-    }
 }
 
 function drawWhiteCard(game, player) {
