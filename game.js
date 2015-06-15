@@ -17,8 +17,8 @@ function removeFromArray(array, item) {
 
 function list() {
   return toInfo(_.filter(gameList, function(x) {
-    // XXX: Not sure what this is for
-    return x.players.length < config.minPlayers && !x.isStarted
+    // This is used to determine what games are shown in the lobby
+    return x.players.length < config.maxPlayers;
   }));
 }
 
@@ -28,7 +28,12 @@ function listAll() {
 
 function toInfo(fullGameList) {
   return _.map(fullGameList, function(game) {
-    return { id: game.id, name: game.name, players: game.players.length };
+    return {
+      id: game.id,
+      name: game.name,
+      players: game.players.length,
+      maxPlayers: game.maxPlayers
+    };
   });
 }
 
@@ -44,6 +49,7 @@ function addGame(game) {
   game.isReadyForScoring = false;
   game.isReadyForReview = false;
   game.pointsToWin = config.pointsToWin;
+  game.maxPlayers = config.maxPlayers;
   gameList.push(game);
   return game;
 }
