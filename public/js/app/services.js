@@ -9,7 +9,7 @@ angular.module('myApp.services', [])
   .factory('GameService', function($http) {
         var s4 = function() {
             return Math.floor(Math.random() * 0x10000).toString();
-        }
+        };
         var guid = function(){
             return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
         };
@@ -46,5 +46,5 @@ angular.module('myApp.services', [])
             readyForNextRound: function(gameId, playerId) {
                 $http.post("readyForNextRound",  { playerId: playerId, gameId: gameId });
             }
-        }
+        };
     });
