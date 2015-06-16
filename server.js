@@ -39,7 +39,7 @@ var lobbySocket = io
         console.info('lobby socket connect');
         var gameList = Game.list();
         socket.emit('lobbyJoin', gameList);
-    })
+    });
 
 io.sockets.on('connection', function(socket) {
     socketCount+=1;

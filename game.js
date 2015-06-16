@@ -82,7 +82,7 @@ function joinGame(game, player) {
         } else {
             //someone may have dropped and rejoined. If it was the Czar, we need to re-elect the re-joining player
             var currentCzar = _.find(game.players, function(p) {
-                return p.isCzar == true;
+                return p.isCzar === true;
             });
             if(!currentCzar){
                 game.players[game.players.length - 1].isCzar = true;
