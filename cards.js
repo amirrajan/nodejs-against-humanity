@@ -8,7 +8,7 @@ function black() {
   //  Get the cards from the json database and filter them to work out.
   console.log(card_data.blackCards.length);
   function filter(v) {
-    return v.pick == 1;
+    return v.pick === 1;
   }
   return card_data.blackCards.filter(filter);
 }
