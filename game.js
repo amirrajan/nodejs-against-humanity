@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var cards = require('./cards.js');
+var config = require('./config.js');
 
 var gameList = [];
 
@@ -16,7 +17,8 @@ function removeFromArray(array, item) {
 
 function list() {
   return toInfo(_.filter(gameList, function(x) {
-    return x.players.length < 4 && !x.isStarted
+    // This is used to determine what games are shown in the lobby
+    return x.players.length < config.maxPlayers;
   }));
 }
 
@@ -26,7 +28,12 @@ function listAll() {
 
 function toInfo(fullGameList) {
   return _.map(fullGameList, function(game) {
-    return { id: game.id, name: game.name, players: game.players.length };
+    return {
+      id: game.id,
+      name: game.name,
+      players: game.players.length,
+      maxPlayers: game.maxPlayers
+    };
   });
 }
 
@@ -41,7 +48,8 @@ function addGame(game) {
   game.currentBlackCard = "";
   game.isReadyForScoring = false;
   game.isReadyForReview = false;
-  game.pointsToWin = 5;
+  game.pointsToWin = config.pointsToWin;
+  game.maxPlayers = config.maxPlayers;
   gameList.push(game);
   return game;
 }
@@ -61,19 +69,20 @@ function joinGame(game, player) {
     isCzar: false
     };
 
-    for(var i = 0; i < 7; i++) {
+    for(var i = 0; i < config.whiteCardsPerHand; i++) {
         drawWhiteCard(game, joiningPlayer);
     }
 
     game.players.push(joiningPlayer);
 
-    if(game.players.length === 4) {
+    // Need to add a start game button, not just start automatically
+    if(game.players.length === config.minPlayers) {
         if(!game.isStarted){
             startGame(game);
         } else {
             //someone may have dropped and rejoined. If it was the Czar, we need to re-elect the re-joining player
             var currentCzar = _.find(game.players, function(p) {
-                return p.isCzar == true;
+                return p.isCzar === true;
             });
             if(!currentCzar){
                 game.players[game.players.length - 1].isCzar = true;
@@ -105,6 +114,18 @@ function startGame(game) {
   game.players[0].isCzar = true;
 }
 
+function selectCardCzar(game) {
+  for (var i = 0; i < game.players.length; i++) {
+    if (game.players[i].isCzar === true) {
+      game.players[i].isCzar = false;
+      var nextCzar = (i + 1) % game.players.length;
+      game.players[nextCzar].isCzar = true;
+      game.players[nextCzar].isReady = false;
+      return;
+    }
+  }
+}
+
 function roundEnded(game) {
   game.winnerId = null;
   game.winningCardId = null;
@@ -123,32 +144,15 @@ function roundEnded(game) {
     player.selectedWhiteCardId = null;
   });
 
-  if(game.players[0].isCzar === true) {
-    game.players[0].isCzar = false;
-    game.players[1].isCzar = true;
-    game.players[1].isReady = false;
+  // create a function to rotate through the players
+  selectCardCzar(game);
+
+  if(game.isOver){
+    _.map(game.players, function(p) {
+        p.awesomePoints = 0;
+    });
+    game.isOver = false;
   }
-  else if(game.players[1].isCzar === true) {
-    game.players[1].isCzar = false;
-    game.players[2].isCzar = true;
-    game.players[2].isReady = false;
-  }
-  else if(game.players[2].isCzar === true) {
-    game.players[2].isCzar = false;
-    game.players[3].isCzar = true;
-    game.players[3].isReady = false;
-  }
-  else if(game.players[3].isCzar === true) {
-    game.players[3].isCzar = false;
-    game.players[0].isCzar = true;
-    game.players[0].isReady = false;
-  }
-    if(game.isOver){
-        _.map(game.players, function(p) {
-            p.awesomePoints = 0;
-        });
-        game.isOver = false;
-    }
 }
 
 function drawWhiteCard(game, player) {
@@ -198,7 +202,7 @@ function selectCard(gameId, playerId, whiteCardId) {
     return x.selectedWhiteCardId;
   });
 
-  if(readyPlayers.length === 3) {
+  if(readyPlayers.length === game.players.length - 1) {
     game.isReadyForScoring = true;
   }
 }

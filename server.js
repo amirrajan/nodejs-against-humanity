@@ -6,8 +6,9 @@ var routes = require('./routes/routes.js');
 var players = { };
 var io = require('socket.io').listen(server);
 var socketCount = 0;
+var config = require('./config.js');
 
-server.listen(process.env.PORT || 3000);
+server.listen(process.env.PORT || config.port || 3000);
 
 app.set('view engine', 'ejs');
 app.set('view options', { layout: false });
@@ -38,7 +39,7 @@ var lobbySocket = io
         console.info('lobby socket connect');
         var gameList = Game.list();
         socket.emit('lobbyJoin', gameList);
-    })
+    });
 
 io.sockets.on('connection', function(socket) {
     socketCount+=1;
@@ -90,7 +91,7 @@ app.post('/joingame', function (req, res) {
     return null;
   }
 
-  if(game.isStarted || game.players.length >= 4) {
+  if(game.players.length >= config.maxPlayers) {
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.write(JSON.stringify({ error: "too many players" }));
     res.end();
