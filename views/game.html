@@ -8,9 +8,7 @@
   <hr/>
 </div>
 <div id="notificationWaitingOnRound" ng-show="!game.isStarted" class="center row alert alert-warning">waiting on round to start</div>
-<div class="row blackCard" ng-show="game.isStarted">
-  {{game.currentBlackCard}}
-</div>
+<div class="row blackCard" ng-show="game.isStarted" ng-bind-html="game.currentBlackCard"></div>
 <br>
 <div id="notificationCardCzar" ng-show="currentPlayer.isCzar" class="row alert alert-info center">You are the Card Czar.</div>
 <div id="notificationSelectCard" ng-show="showNotificationSelectCard()" class="row alert alert-success center">Select a card to play.</div>
