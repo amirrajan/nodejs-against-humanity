@@ -36,7 +36,7 @@ angular.module('myApp.controllers', [])
 
         $scope.$on('enterGame', function() {
             $scope.inLobby = false;
-        })
+        });
 
     })
     .controller('GameCtrl', function($scope, $routeParams, GameService){
