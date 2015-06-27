@@ -91,8 +91,8 @@ angular.module('myApp.controllers', [])
         $scope.buildWinningText = function(history) {
             var text = history.black;
 
-            if(text.indexOf("__________") != -1) {
-                text = text.replace("__________", "<b>" + history.white + "</b>");
+            if(text.indexOf("_") != -1) {
+                text = text.replace("_", "<b>" + history.white + "</b>");
             } else {
                 text = text + " <b>" + history.white + "</b>"
             }
