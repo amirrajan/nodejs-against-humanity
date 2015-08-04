@@ -163,8 +163,9 @@ function drawWhiteCard(game, player) {
 
 function setCurrentBlackCard(game) {
   var index = Math.floor(Math.random() * game.deck.black.length);
-  game.currentBlackCard = game.deck.black[index];
+  game.currentBlackCard = game.deck.black[index].text;
   game.deck.black.splice(index, 1);
+  console.log("New Black Card: "+game.currentBlackCard);
 }
 
 function getPlayer(gameId, playerId) {
