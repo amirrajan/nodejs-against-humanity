@@ -21,7 +21,7 @@ Then navigate to `http://localhost:3000`
 If you want tests to execute every time you change a file:
 
     jasmine-node ./spec/describe_Game_spec.js --autotest --watch ./game.js
-    
+
 To run the E2E tests you first must install protractor. see: https://github.com/angular/protractor/blob/master/docs/getting-started.md
 
 If you want the server to load up everytime you change the back end:
@@ -32,55 +32,11 @@ Then run the following instead of `node server.js`:
 
     nodemon server.js
 
-##Deploy to Gitdeploy
-
-See this app live in action by deploying it to [Gitdeploy.io](https://gitdeploy.io):
-
-[![Deploy nodejs-against-humanity via gitdeploy.io](https://img.shields.io/badge/gitdeploy.io-deploy%20nodejs--against--humanity/master-green.svg)](https://www.gitdeploy.io/deploy?repository=https%3A%2F%2Fgithub.com%2Famirrajan%2Fnodejs-against-humanity.git)
-
-##Signing up, and deploying to Nodejitsu
-
-###Documentation
-
-The documenation was available on the front page (right under the sign up for free button): https://www.nodejitsu.com/getting-started/
-
-Install the Nodejitsu Package
-
-    npm install jitsu -g (you may need to prefix this with sudo if you're on Mac)
-
-Register via the command line:
-
-    jitsu signup (yes you can sign up via the command line)
-
-You'll get a confirmation email with a command to type in:
-
-    jitsu users confirm [username] [confirmation-guid]
-
-If you've already registered, you can login with:
-
-    jitsu login
-
-After you confirm your email, you can login (the `confirm` command should prompt you to log in).
-
-Change the `subdomain` value in `package.json`, to reflect the url you want to deploy to:
-
-    {
-      "name": "nodejs-against-humanity",
-      [...],
-      "subdomain": "nah-amir-rajan" <--- this value
-    }
-
-now deploy:
-
-    jitsu deploy
-
-And your app should be up on Nodejitsu.
-
 ##Signing up, and deploying to Heroku
 
 ###Documentation
 
-From heroku.com, click Documentation, then click the Getting Started button, then click Node.js from the list of options on the left...which will take you here: https://devcenter.heroku.com/articles/nodejs 
+From heroku.com, click Documentation, then click the Getting Started button, then click Node.js from the list of options on the left...which will take you here: https://devcenter.heroku.com/articles/nodejs
 
 Install Heroku toolbelt from here: https://toolbelt.heroku.com/
 
@@ -98,50 +54,8 @@ Git deploy your app:
 
     git push heroku master
 
-Assign a dyno to your app:
-
-    heroku ps:scale web=1
-
-Enable websockets (currently in beta):
-
-    heroku labs:enable websockets
-
 Open the app (same as opening it in the browser):
 
     heroku open
 
 And your app should be up on Heroku.
-
-##Signing up, and deploying to Azure
-
-###Documentation
-
-From windowsazure.com, click Documentation, click Developer Center, click node.js, then click the Learn More button which will take you here:
-
-http://www.windowsazure.com/en-us/develop/nodejs/tutorials/create-a-website-(mac)/ (if you're on a Mac, looks like the link is contextual)
-
-Install the command line tools from here:
-
-http://www.windowsazure.com/en-us/downloads/#cmd-line-tools (on Windows, be sure to install the cross platform command line interface...not the powershell version)
-
-From the command line, first download your publish settings (this will redirect you to a website):
-
-    azure account download
-
-After the `.publishsettings` file is downloaded, you'll need to import it:
-
-    azure acount import %pathtofile%
-
-Next create the site, with a git backed repository:
-    
-    azure site create %uniquesitename% --git
-
-Deploy site:
-
-    git push azure master
-
-List of your websites:
-
-    azure site list
-
-And your app should be up on Azure.
