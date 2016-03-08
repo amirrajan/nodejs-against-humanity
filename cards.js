@@ -5,8 +5,6 @@ function getDeck() {
 }
 
 function black() {
-  //  Get the cards from the json database and filter them to work out.
-  console.log(card_data.blackCards.length);
   function filter(v) {
     return v.pick === 1;
   }
@@ -14,7 +12,6 @@ function black() {
 }
 
 function white() {
-  console.log(card_data.whiteCards.length);
   return card_data.whiteCards;
 }
 

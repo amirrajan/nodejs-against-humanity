@@ -72,10 +72,6 @@ describe('multi-libs', function() {
   describe('4 people join a game', function() {
     beforeEach(startGame);
 
-    it('the game is no longer listed', function() {
-      expect(Game.list().length).toBe(0);
-    });
-
     it('the game is started with', function() {
       expect(currentGame.isStarted).toBe(true);
     });
