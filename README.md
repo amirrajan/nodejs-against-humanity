@@ -18,13 +18,25 @@ Run the app:
 
 Then navigate to `http://localhost:3000`
 
-If you want tests to execute every time you change a file:
+#####If you want tests to execute every time you change a file:
+1. Install [jasmine-node](https://github.com/mhevery/jasmine-node):
+```
+npm install jasmine-node -g
+```
+2. Run:
+```
+jasmine-node ./spec/describe_Game_spec.js --autotest --watch ./game.js
+```
 
-    jasmine-node ./spec/describe_Game_spec.js --autotest --watch ./game.js
+#####To run the end-to-end tests you first must install [protractor](https://github.com/angular/protractor/blob/master/docs/getting-started.md).
 
-To run the E2E tests you first must install protractor. see: https://github.com/angular/protractor/blob/master/docs/getting-started.md
+Then run:
 
-If you want the server to load up everytime you change the back end:
+    protractor e2e-test/e2econf.js
+    
+This will launch an instance of Chrome browser and execute the tests.
+
+#####If you want the server to load up everytime you change the back end:
 
     npm install -g nodemon
 
