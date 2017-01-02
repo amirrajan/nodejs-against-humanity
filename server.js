@@ -7,6 +7,7 @@ var players = { };
 var io = require('socket.io').listen(server);
 var socketCount = 0;
 var config = require('./config.js');
+var cards  = require('./cards.js');
 
 server.listen(process.env.PORT || config.port || 3000);
 
@@ -125,4 +126,8 @@ app.post('/readyForNextRound', function(req, res){
   Game.readyForNextRound(req.body.gameId, req.body.playerId);
   broadcastGame(req.body.gameId);
   returnGame(req.body.gameId, res);
+});
+
+app.get('/cardSets', function(req, res){
+    res.json(cards.getSets());
 });

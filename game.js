@@ -44,7 +44,7 @@ function addGame(game) {
   game.winnerId = null;
   game.winningCardId = null;
   game.isStarted = false;
-  game.deck = getDeck();
+  game.deck = cards.getDeckFromSets(game.sets);
   game.currentBlackCard = "";
   game.isReadyForScoring = false;
   game.isReadyForReview = false;

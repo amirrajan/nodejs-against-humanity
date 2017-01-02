@@ -13,17 +13,6 @@ angular.module('myApp.controllers', [])
         $scope.gameSvc = GameService;
         $scope.inLobby = true;
 
-        $scope.createGame = function() {
-            console.info('createGame called');
-            GameService.initName();
-            GameService.createGame()
-                .then(function(success) {
-                    //navigate to the new game
-                    console.info(success);
-                    $scope.joinGame(success.data.id);
-                }, handleError);
-        };
-
         $scope.joinGame = function(gameId) {
             console.info('joinGame called for gameId ' + gameId);
             GameService.initName();
@@ -282,4 +271,37 @@ angular.module('myApp.controllers', [])
         }
         initSocket();
         $scope.$emit('enterLobby');
+    })
+    .controller('CreateGameCtrl', function ($scope, $http, $location, GameService) {
+        $scope.name = null;
+        $scope.submitted = false;
+
+        $scope.createGame = function (form) {
+            $scope.submitted = true;
+            //Validate that at least one set has been chosen
+            if ($scope.sets.filter(set => set.enabled).length == 0) {
+                $scope.error = "You must select at least one deck.";
+                return false;
+            }
+            //Create the game
+            GameService.createGame($scope.name, $scope.sets.filter(set => set.enabled).map(set => set.id))
+                .then(function (success) {
+                    GameService.initName();
+                    $location.url("/game/" + success.data.id + "/pId/" + GameService.playerId + "/name/" + GameService.playerName);
+                });
+        };
+
+        function initGameName() {
+            if (GameService.playerName.length > 0) {
+                $scope.name = GameService.playerName + "'s game";
+            }
+        }
+
+        initGameName();
+        //Initialise card sets
+        $http.get('/cardSets').then(function(response) {
+            $scope.sets = response.data;
+            //Enable base
+            $scope.sets.map(set => set.enabled = set.id == "Base");
+        });
     });

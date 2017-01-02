@@ -22,8 +22,6 @@ describe('node against humanity lobby', function() {
     element(by.model('gameSvc.playerName')).sendKeys('Chris');
     element(by.id('aCreatGame')).click();
 
-    expect(element(by.id('gameName')).getText()).toEqual('Chris\'s game (waiting for players)');
-
     setTimeout(function() {
       //give the page a second to return results and change the bindings. Not sure if there is a better way to do this
       expect(element(by.id('notificationCardCzar')).isDisplayed()).toBe(true);

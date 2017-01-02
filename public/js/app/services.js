@@ -28,8 +28,8 @@ angular.module('myApp.services', [])
             getGames: function() {
                 return $http.get('/list');
             },
-            createGame: function() {
-                return $http.post('/add', { id: guid(), name: this.playerName + "'s game" });
+            createGame: function(name, sets) {
+                return $http.post('/add', { id: guid(), name: name, sets: sets});
             },
             joinGame: function(gameId, playerId, name) {
                 return $http.post("/joingame", { gameId: gameId, playerId: playerId, playerName: name });
