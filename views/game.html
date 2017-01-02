@@ -8,10 +8,14 @@
   <hr/>
 </div>
 <div id="notificationWaitingOnRound" ng-show="!game.isStarted" class="center row alert alert-warning">waiting on round to start</div>
-<div class="row blackCard" ng-show="game.isStarted" ng-bind-html="game.currentBlackCard"></div>
+<div class="row blackCard" ng-show="game.isStarted" ng-bind-html="getBlackCardHtml(game.currentBlackCard, currentPlayer.selectedWhiteCardIds)"></div>
 <br>
 <div id="notificationCardCzar" ng-show="currentPlayer.isCzar" class="row alert alert-info center">You are the Card Czar.</div>
-<div id="notificationSelectCard" ng-show="showNotificationSelectCard()" class="row alert alert-success center">Select a card to play.</div>
+<div id="notificationSelectCard" ng-show="showNotificationSelectCard()" class="row alert alert-success center">
+  Select
+  <ng-pluralize count="getCardRequiredCount()" when="{'one': 'a card', 'other': '{} cards'}"></ng-pluralize>
+  to play.
+</div>
 <div id="notificationWaitingOnCzar" ng-show="showNotificationWaitingOnCzar()" class="row alert alert-warning center">Waiting for the Card Czar to pick winner.</div>
 <div id="notificationWaitingOnCards" ng-show="showNotificationWaitingOnCards()" class="row alert alert-warning center">Waiting for other players.</div>
 <div id="notificationSelectWinner" ng-show="showNotificationSelectWinner()" class="row alert alert-success center">Select a card to be the winner.</div>
@@ -20,9 +24,14 @@
     <tbody id="whiteCardSelection">
       <tr ng-repeat="whiteCard in currentPlayer.cards">
         <td>
-          <button class="btn btn-default" ng-class="getButtonClass(whiteCard)" ng-click="selectCard(whiteCard)">{{getButtonText(whiteCard)}}</button>
+          <button
+                  ng-repeat="n in getWhiteCardCount()"
+                  class="btn btn-default"
+                  ng-disabled="getButtonDisabled(whiteCard, n)"
+                  ng-class="getButtonClass(whiteCard, n)"
+                  ng-click="selectCard(whiteCard, n)">{{getButtonText(whiteCard, n)}}</button>
         </td>
-        <td class="col-lg-10 col-md-10" style="font-size: 16px; font-weight: bold; line-height: 25px;">{{whiteCard}}</td>
+        <td class="col-lg-10 col-md-10" style="font-size: 16px; font-weight: bold; line-height: 25px;" ng-bind-html="whiteCard"></td>
       </tr>
     </tbody>
   </table>
@@ -30,12 +39,14 @@
 <div class="row" ng-show="showSelectedWhiteCardList()">
   <table id="selectedWhiteCards" class="table">
     <tbody>
-      <tr ng-repeat="player in game.players | filter:whiteCardNonNull" ng-class="getWinningCardClass(player.selectedWhiteCardId)">
+      <tr ng-repeat="player in game.players | filter:whiteCardNonNull" ng-class="getWinningCardClass(player.id)">
         <td>
-          <button class="btn btn-default" ng-show="!game.isReadyForReview" ng-click="selectWinner(player.selectedWhiteCardId)">select</button>
+          <button class="btn btn-default" ng-show="!game.isReadyForReview" ng-click="selectWinner(player.id)">select</button>
           <span ng-show="game.isReadyForReview">{{player.name}}</span>
         </td>
-        <td class="col-lg-10 col-md-10" style="font-size: 16px; font-weight: bold; line-height: 25px;"><span ng-show="game.winningCardId === player.selectedWhiteCardId">Winner: &nbsp;</span>{{player.selectedWhiteCardId}}</td>
+        <td class="col-lg-10 col-md-10" style="font-size: 16px; font-weight: bold; line-height: 25px;">
+          <span ng-show="game.winningPlayerId === player.id">Winner: &nbsp;</span>
+          <span ng-bind-html="getBlackCardHtml(game.currentBlackCard, player.selectedWhiteCardIds)"></span>
       </tr>
     </tbody>
   </table>
@@ -71,11 +82,11 @@
   </ul>
 </div>
 <h4>Round Winners</h4>
-<div id="rountWinners" class="row">
+<div id="roundWinners" class="row">
   <ul class="list-group">
     <li class="list-group-item" ng-repeat="item in game.history">
     <span class="text-success">{{item.winner}}:&nbsp;</span>
-    <span ng-bind-html="buildWinningText(item)"></span>
+    <span ng-bind-html="getBlackCardHtml(item.black, item.white)"></span>
     </li>
   </ul>
 </div>

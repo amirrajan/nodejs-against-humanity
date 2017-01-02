@@ -15,6 +15,12 @@ function removeFromArray(array, item) {
   }
 }
 
+function removeElementsFromArray(array, items) {
+    for(let i = items.length - 1; i >= 0; i--) {
+      array.splice(items[i], 1);
+    }
+}
+
 function list() {
   return toInfo(_.filter(gameList, function(x) {
     // This is used to determine what games are shown in the lobby
@@ -42,10 +48,10 @@ function addGame(game) {
   game.history = [];
   game.isOver = false;
   game.winnerId = null;
-  game.winningCardId = null;
   game.isStarted = false;
   game.deck = cards.getDeckFromSets(game.sets);
   game.currentBlackCard = "";
+  game.whiteCardsRequired = 0;
   game.isReadyForScoring = false;
   game.isReadyForReview = false;
   game.pointsToWin = config.pointsToWin;
@@ -65,12 +71,13 @@ function joinGame(game, player) {
     isReady: false,
     cards : [],
     selectedWhiteCardId: null,
+    selectedWhiteCardIds: [],
     awesomePoints: 0,
     isCzar: false
     };
 
     for(var i = 0; i < config.whiteCardsPerHand; i++) {
-        drawWhiteCard(game, joiningPlayer);
+        drawWhiteCards(game, joiningPlayer, 1);
     }
 
     game.players.push(joiningPlayer);
@@ -128,7 +135,7 @@ function selectCardCzar(game) {
 
 function roundEnded(game) {
   game.winnerId = null;
-  game.winningCardId = null;
+  game.winningPlayerId = null;
   game.isReadyForScoring = false;
   game.isReadyForReview = false;
 
@@ -136,12 +143,12 @@ function roundEnded(game) {
 
   _.each(game.players, function(player) {
     if(!player.isCzar) {
-      removeFromArray(player.cards, player.selectedWhiteCardId);
-      drawWhiteCard(game, player);
+      removeElementsFromArray(player.cards, player.selectedWhiteCardIds);
+      drawWhiteCards(game, player, game.whiteCardsRequired);
     }
 
     player.isReady = false;
-    player.selectedWhiteCardId = null;
+    player.selectedWhiteCardIds = [];
   });
 
   // create a function to rotate through the players
@@ -155,7 +162,7 @@ function roundEnded(game) {
   }
 }
 
-function drawWhiteCard(game, player) {
+function drawWhiteCards(game, player, numberCards) {
   var whiteIndex = Math.floor(Math.random() * game.deck.white.length);
   player.cards.push(game.deck.white[whiteIndex]);
   game.deck.white.splice(whiteIndex, 1);
@@ -163,18 +170,14 @@ function drawWhiteCard(game, player) {
 
 function setCurrentBlackCard(game) {
   var index = Math.floor(Math.random() * game.deck.black.length);
-  game.currentBlackCard = game.deck.black[index].text;
+  game.currentBlackCard = game.deck.black[index].text
+  game.whiteCardsRequired = game.deck.black[index].pick;
   game.deck.black.splice(index, 1);
 }
 
 function getPlayer(gameId, playerId) {
   var game = getGame(gameId);
   return _.find(game.players, function(x) { return x.id === playerId; });
-}
-
-function getPlayerByCardId(gameId, cardId) {
-  var game = getGame(gameId);
-  return _.findWhere(game.players, { selectedWhiteCardId: cardId });
 }
 
 function readyForNextRound(gameId, playerId) {
@@ -191,15 +194,15 @@ function readyForNextRound(gameId, playerId) {
   }
 }
 
-function selectCard(gameId, playerId, whiteCardId) {
+function selectCard(gameId, playerId, whiteCardId, index) {
   var player = getPlayer(gameId, playerId);
-  player.selectedWhiteCardId = whiteCardId;
+  player.selectedWhiteCardIds[index] = whiteCardId;
   player.isReady = false;
 
   var game = getGame(gameId);
 
   var readyPlayers = _.filter(game.players, function (x) {
-    return x.selectedWhiteCardId;
+    return x.selectedWhiteCardIds.length === game.whiteCardsRequired;
   });
 
   if(readyPlayers.length === game.players.length - 1) {
@@ -207,17 +210,17 @@ function selectCard(gameId, playerId, whiteCardId) {
   }
 }
 
-function selectWinner(gameId, cardId) {
-  var player = getPlayerByCardId(gameId, cardId);
+function selectWinner(gameId, playerId) {
+  var player = getPlayer(gameId, playerId);
   var game = getGame(gameId);
-  game.winningCardId = cardId;
+  game.winningPlayerId = playerId;
   game.isReadyForReview = true;
   player.awesomePoints = player.awesomePoints + 1;
-  game.history.push({ black: game.currentBlackCard, white: cardId, winner: player.name });
+  game.history.push({ black: game.currentBlackCard, white: player.selectedWhiteCardIds, winner: player.name });
   if(player.awesomePoints === game.pointsToWin) {
     game = getGame(gameId);
     game.isOver = true;
-    game.winnerId = player.id;
+    game.winnerId = playerId;
   }
 }
 

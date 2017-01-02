@@ -37,11 +37,11 @@ angular.module('myApp.services', [])
             departGame: function(gameId, playerId) {
                 $http.post('/departgame', { gameId: gameId, playerId: playerId});
             },
-            selectCard: function(gameId, playerId, selectedCard){
-                $http.post("/selectCard", { gameId: gameId, playerId: playerId, whiteCardId: selectedCard });
+            selectCard: function(gameId, playerId, selectedCard, index){
+                $http.post("/selectCard", { gameId: gameId, playerId: playerId, whiteCardId: selectedCard, index: index });
             },
-            selectWinner: function(gameId, selectedCard) {
-                $http.post("/selectWinner", { gameId: gameId, cardId: selectedCard });
+            selectWinner: function(gameId, selectedPlayer) {
+                $http.post("/selectWinner", { gameId: gameId, playerId: selectedPlayer });
             },
             readyForNextRound: function(gameId, playerId) {
                 $http.post("readyForNextRound",  { playerId: playerId, gameId: gameId });

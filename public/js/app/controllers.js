@@ -45,7 +45,7 @@ angular.module('myApp.controllers', [])
         //ng-show helper functions
         $scope.showNotificationSelectCard = function() {
             return !$scope.currentPlayer.isCzar &&
-                !$scope.currentPlayer.selectedWhiteCardId &&
+                $scope.currentPlayer.selectedWhiteCardIds.length < $scope.game.whiteCardsRequired &&
                 $scope.game.isStarted &&
                 !$scope.game.isReadyForScoring
         };
@@ -57,7 +57,7 @@ angular.module('myApp.controllers', [])
         };
 
         $scope.showNotificationWaitingOnCards = function() {
-            return ($scope.currentPlayer.isCzar || $scope.currentPlayer.selectedWhiteCardId) &&
+            return ($scope.currentPlayer.isCzar || $scope.currentPlayer.selectedWhiteCardIds.length === $scope.game.whiteCardsRequired) &&
                 !$scope.game.isReadyForScoring
         };
 
@@ -77,6 +77,10 @@ angular.module('myApp.controllers', [])
         };
         //end ng-show helper functions
 
+      $scope.getCardRequiredCount = function() {
+        return $scope.game.whiteCardsRequired - $scope.currentPlayer.selectedWhiteCardIds.length;
+      };
+
         $scope.buildWinningText = function(history) {
             var text = history.black;
 
@@ -89,8 +93,8 @@ angular.module('myApp.controllers', [])
         };
 
         $scope.whiteCardNonNull = function(item) {
-            return item.selectedWhiteCardId != undefined;
-        }
+            return item.selectedWhiteCardIds.length > 0;
+        };
 
         $scope.getPlayerStatus = function(player) {
             var status ='';
@@ -100,10 +104,10 @@ angular.module('myApp.controllers', [])
             else if(!$scope.game.isReadyForReview && !$scope.game.isReadyForScoring) {
                 if(player.isCzar) {
                     status = "card czar";
-                } else if(!player.selectedWhiteCardId) {
-                    status = "selecting card";
-                } else if(player.selectedWhiteCardId) {
-                    status = "card selected";
+                } else if(player.selectedWhiteCardIds.length < $scope.game.whiteCardsRequired) {
+                    status = "selecting cards";
+                } else if(player.selectedWhiteCardIds.length === $scope.game.whiteCardsRequired) {
+                    status = "cards selected";
                 }
             }
             else if($scope.game.isReadyForReview) {
@@ -127,32 +131,43 @@ angular.module('myApp.controllers', [])
             return status;
         }
 
-        $scope.selectCard = function(card) {
-            GameService.selectCard($scope.gameId, $scope.playerId, card);
+        $scope.selectCard = function(card, index) {
+            GameService.selectCard($scope.gameId, $scope.playerId, card, index);
         };
 
-        $scope.getButtonClass = function(card) {
-            if(card === $scope.currentPlayer.selectedWhiteCardId) {
+        $scope.getButtonDisabled = function(card, index) {
+            //If it's used in another index we need to disable it here
+            let disabled = false;
+            $scope.currentPlayer.selectedWhiteCardIds.forEach((selectedCard, selectedIndex) => {
+                if (selectedIndex !== index && selectedCard === card) {
+                    disabled = true;
+                }
+            });
+            return disabled;
+        };
+
+        $scope.getButtonClass = function(card, index) {
+            if($scope.currentPlayer.selectedWhiteCardIds[index] !== undefined && card === $scope.currentPlayer.selectedWhiteCardIds[index]) {
                 return 'btn btn-primary'
             } else {
                 return 'btn btn-default'
             }
         };
 
-        $scope.getButtonText = function(card) {
-            if(card === $scope.currentPlayer.selectedWhiteCardId) {
+        $scope.getButtonText = function(card, index) {
+            if($scope.currentPlayer.selectedWhiteCardIds[index] !== undefined && card === $scope.currentPlayer.selectedWhiteCardIds[index]) {
                 return 'selected'
             } else {
                 return 'select'
             }
         };
 
-        $scope.selectWinner = function(card) {
-            GameService.selectWinner($scope.gameId, card);
+        $scope.selectWinner = function(playerId) {
+            GameService.selectWinner($scope.gameId, playerId);
         };
 
-        $scope.getWinningCardClass = function(card) {
-            if(card === $scope.game.winningCardId){
+        $scope.getWinningCardClass = function(playerId) {
+            if(playerId === $scope.game.winningPlayerId){
                 return 'alert alert-success'
             } else {
                 return ''
@@ -163,10 +178,34 @@ angular.module('myApp.controllers', [])
             GameService.readyForNextRound($scope.gameId, $scope.playerId);
         };
 
+        $scope.getWhiteCardCount = function() {
+            return _.range($scope.game.whiteCardsRequired);
+        };
+
+        $scope.getBlackCardHtml = function(blackCard, whiteCards) {
+            //If there's no underscores to replace, tack the answers onto the end
+            if (blackCard.indexOf('_') === -1) {
+                let returnString = blackCard;
+                whiteCards.forEach(x => returnString = returnString + '<span class="blackCardAnswer">' + x + '</span>');
+                return returnString;
+            }
+            let z = -1;
+            return blackCard.replace(/_/g, function() {
+                z++;
+                if (whiteCards[z] !== undefined) {
+                    //Trim punctuation from white card
+                    const whiteCardAnswer = whiteCards[z].replace(/\./g, '');
+                    return '<span class="blackCardAnswer">' + whiteCardAnswer + '</span>';
+                } else {
+                    return "_";
+                }
+            });
+        };
+
         function setProgStyle() {
             if($scope.game){
                 var playersWaiting = _.reduce($scope.game.players, function(total, player) {
-                    if(player.selectedWhiteCardId){return total + 1}
+                    if(player.selectedWhiteCardIds.length === $scope.game.whiteCardsRequired){return total + 1}
                     else{ return total}
                 }, 0);
                 //this extra addition brings the progress bar to 100% when the game is ready for review
