@@ -20,6 +20,8 @@ function getDeckFromSets(selected) {
     });
     blackIndices.forEach(i => blackCards.push(card_data.blackCards[i]));
     whiteIndices.forEach(i => whiteCards.push(card_data.whiteCards[i]));
+    //Filter black cards to only show pick 1
+    blackCards = blackCards.filter(card => card.pick == 1);
     return {
         black: blackCards,
         white: whiteCards
