@@ -142,7 +142,8 @@ function roundEnded(game) {
   _.each(game.players, function(player) {
     if(!player.isCzar) {
       player.cards = removeElementsFromArray(player.cards, player.selectedWhiteCardIds);
-      drawWhiteCards(game, player, game.whiteCardsRequired);
+      //Build their deck back to required size
+      drawWhiteCards(game, player, config.whiteCardsPerHand - player.cards.length);
     }
 
     player.isReady = false;
@@ -161,9 +162,11 @@ function roundEnded(game) {
 }
 
 function drawWhiteCards(game, player, numberCards) {
-  var whiteIndex = Math.floor(Math.random() * game.deck.white.length);
-  player.cards.push(game.deck.white[whiteIndex]);
-  game.deck.white.splice(whiteIndex, 1);
+  for (let i = 0; i < numberCards; i++) {
+    var whiteIndex = Math.floor(Math.random() * game.deck.white.length);
+    player.cards.push(game.deck.white[whiteIndex]);
+    game.deck.white.splice(whiteIndex, 1);
+  }
 }
 
 function setCurrentBlackCard(game) {
