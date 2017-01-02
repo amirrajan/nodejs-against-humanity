@@ -131,3 +131,7 @@ app.post('/readyForNextRound', function(req, res){
 app.get('/cardSets', function(req, res){
     res.json(cards.getSets());
 });
+
+app.get('/expansions', function(req, res){
+    res.json(cards.getExpansions());
+});

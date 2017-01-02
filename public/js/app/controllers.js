@@ -317,13 +317,16 @@ angular.module('myApp.controllers', [])
 
         $scope.createGame = function (form) {
             $scope.submitted = true;
+            if (!form.$valid) {
+                return false;
+            }
             //Validate that at least one set has been chosen
-            if ($scope.sets.filter(set => set.enabled).length == 0) {
+            if ($scope.sets.filter(set => set.enabled).length == 0 && $scope.expansions.filter(set => set.enabled).length == 0) {
                 $scope.error = "You must select at least one deck.";
                 return false;
             }
             //Create the game
-            GameService.createGame($scope.name, $scope.sets.filter(set => set.enabled).map(set => set.id))
+            GameService.createGame($scope.name, $scope.sets.filter(set => set.enabled).map(set => set.id), $scope.expansions.filter(expansion => expansion.enabled).map(expansion => expansion.id))
                 .then(function (success) {
                     GameService.initName();
                     $location.url("/game/" + success.data.id + "/pId/" + GameService.playerId + "/name/" + GameService.playerName);
@@ -342,5 +345,9 @@ angular.module('myApp.controllers', [])
             $scope.sets = response.data;
             //Enable base
             $scope.sets.map(set => set.enabled = set.id == "Base");
+        });
+        //Initialise expansions
+        $http.get('/expansions').then(function(response) {
+           $scope.expansions = response.data;
         });
     });

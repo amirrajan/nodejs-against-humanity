@@ -16,9 +16,7 @@ function removeFromArray(array, item) {
 }
 
 function removeElementsFromArray(array, items) {
-    for(let i = items.length - 1; i >= 0; i--) {
-      array.splice(items[i], 1);
-    }
+  return _.difference(array, items);
 }
 
 function list() {
@@ -49,7 +47,7 @@ function addGame(game) {
   game.isOver = false;
   game.winnerId = null;
   game.isStarted = false;
-  game.deck = cards.getDeckFromSets(game.sets);
+  game.deck = cards.getDeckFromSets(game.sets, game.expansions);
   game.currentBlackCard = "";
   game.whiteCardsRequired = 0;
   game.isReadyForScoring = false;
@@ -143,7 +141,7 @@ function roundEnded(game) {
 
   _.each(game.players, function(player) {
     if(!player.isCzar) {
-      removeElementsFromArray(player.cards, player.selectedWhiteCardIds);
+      player.cards = removeElementsFromArray(player.cards, player.selectedWhiteCardIds);
       drawWhiteCards(game, player, game.whiteCardsRequired);
     }
 
