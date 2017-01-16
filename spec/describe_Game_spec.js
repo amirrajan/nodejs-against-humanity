@@ -1,5 +1,6 @@
 var _ = require('underscore');
-var Game = require('../game.js')
+var Game = require('../game.js');
+var cards = require('../cards.js');
 
 describe('multi-libs', function() {
   var playerList = [
@@ -12,7 +13,7 @@ describe('multi-libs', function() {
   var currentGame;
 
   function createGame() {
-    Game.addGame({ id: gameId, name: "some game" });
+    Game.addGame({ id: gameId, name: "some game", sets: ["Base"] });
     currentGame = Game.getGame(gameId);
   };
 
@@ -60,8 +61,8 @@ describe('multi-libs', function() {
     });
 
     it('a deck is created', function() {
-      expect(currentGame.deck.black.length).toBe(Game.getDeck().black.length);
-      expect(currentGame.deck.white.length).toBe(Game.getDeck().white.length);
+      expect(currentGame.deck.black.length).toBe(cards.getDeckFromSets(["Base"]).black.length);
+      expect(currentGame.deck.white.length).toBe(cards.getDeckFromSets(["Base"]).white.length);
     });
 
     it('the game is listed for joining', function() {

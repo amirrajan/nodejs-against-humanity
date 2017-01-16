@@ -7,6 +7,7 @@ var players = { };
 var io = require('socket.io').listen(server);
 var socketCount = 0;
 var config = require('./config.js');
+var cards  = require('./cards.js');
 
 server.listen(process.env.PORT || config.port || 3000);
 
@@ -110,13 +111,13 @@ app.post('/departgame', function(req, res) {
 });
 
 app.post('/selectcard', function(req, res) {
-  Game.selectCard(req.body.gameId, req.body.playerId, req.body.whiteCardId);
+  Game.selectCard(req.body.gameId, req.body.playerId, req.body.whiteCardId, req.body.index);
   broadcastGame(req.body.gameId);
   returnGame(req.body.gameId, res);
 });
 
 app.post('/selectWinner', function(req, res) {
-  Game.selectWinner(req.body.gameId, req.body.cardId);
+  Game.selectWinner(req.body.gameId, req.body.playerId);
   broadcastGame(req.body.gameId);
   returnGame(req.body.gameId, res);
 });
@@ -125,4 +126,12 @@ app.post('/readyForNextRound', function(req, res){
   Game.readyForNextRound(req.body.gameId, req.body.playerId);
   broadcastGame(req.body.gameId);
   returnGame(req.body.gameId, res);
+});
+
+app.get('/cardSets', function(req, res){
+    res.json(cards.getSets());
+});
+
+app.get('/expansions', function(req, res){
+    res.json(cards.getExpansions());
 });

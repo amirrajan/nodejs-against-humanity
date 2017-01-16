@@ -1,7 +1,7 @@
 .blackCard {
   font-weight: bold;
   font-size: 25px;
-  line-height: 25px;
+  line-height: 35px;
   color: #FFFFFF;
   background-color: #2c2c2c;
   padding: 20px;
@@ -20,4 +20,17 @@
 
 .alert {
   font-size: 16px;
+}
+
+.blackCardAnswer {
+  background-color: white;
+  color: #2c2c2c;
+  padding: 5px;
+  border-radius: 3px;
+  margin: 0 3px;
+}
+
+#selectedWhiteCards .blackCardAnswer, #roundWinners .blackCardAnswer {
+  background-color: #2c2c2c;
+  color: white;
 }

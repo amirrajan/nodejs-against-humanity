@@ -1,0 +1,19 @@
+<div class="alert alert-danger" ng-show="error">
+    <p>{{error}}</p>
+</div>
+<form novalidate name="createGameForm">
+    <div class="form-group" ng-class="{'has-error': createGameForm.name.$invalid && submitted}">
+        <label class="control-label">Game Name</label>
+        <input name="name" type="text" ng-model="name" class="form-control" required>
+        <span class="help-block" ng-show="createGameForm.name.$error.required && submitted">You must enter a game name.</span>
+    </div>
+    <legend>Core</legend>
+    <div class="checkbox" ng-repeat="set in sets">
+        <label><input type="checkbox" ng-model="set.enabled"> {{set.name}}</label>
+    </div>
+    <legend>Expansions</legend>
+    <div class="checkbox" ng-repeat="expansion in expansions">
+        <label><input type="checkbox" ng-model="expansion.enabled"> {{expansion.name}}</label>
+    </div>
+    <button type="submit" class="btn btn-primary" ng-click="createGame(createGameForm)">Create Game</button>
+</form>

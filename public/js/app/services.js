@@ -28,8 +28,8 @@ angular.module('myApp.services', [])
             getGames: function() {
                 return $http.get('/list');
             },
-            createGame: function() {
-                return $http.post('/add', { id: guid(), name: this.playerName + "'s game" });
+            createGame: function(name, sets, expansions) {
+                return $http.post('/add', { id: guid(), name: name, sets: sets, expansions: expansions});
             },
             joinGame: function(gameId, playerId, name) {
                 return $http.post("/joingame", { gameId: gameId, playerId: playerId, playerName: name });
@@ -37,11 +37,11 @@ angular.module('myApp.services', [])
             departGame: function(gameId, playerId) {
                 $http.post('/departgame', { gameId: gameId, playerId: playerId});
             },
-            selectCard: function(gameId, playerId, selectedCard){
-                $http.post("/selectCard", { gameId: gameId, playerId: playerId, whiteCardId: selectedCard });
+            selectCard: function(gameId, playerId, selectedCard, index){
+                $http.post("/selectCard", { gameId: gameId, playerId: playerId, whiteCardId: selectedCard, index: index });
             },
-            selectWinner: function(gameId, selectedCard) {
-                $http.post("/selectWinner", { gameId: gameId, cardId: selectedCard });
+            selectWinner: function(gameId, selectedPlayer) {
+                $http.post("/selectWinner", { gameId: gameId, playerId: selectedPlayer });
             },
             readyForNextRound: function(gameId, playerId) {
                 $http.post("readyForNextRound",  { playerId: playerId, gameId: gameId });
