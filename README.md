@@ -1,4 +1,4 @@
-##NodeJS Against Humanity
+## NodeJS Against Humanity
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/2.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/">Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic License</a>.
 
@@ -6,7 +6,7 @@ NodeJS implementation of Cards Against Humanity. Here's a screenshot:
 
 <img src="/nodejs-against-humanity.png" />
 
-##Run Locally
+## Run Locally
 
 Install all the dependencies:
 
@@ -18,7 +18,7 @@ Run the app:
 
 Then navigate to `http://localhost:3000`
 
-#####If you want tests to execute every time you change a file:
+##### If you want tests to execute every time you change a file:
 1. Install [jasmine-node](https://github.com/mhevery/jasmine-node):
 ```
 npm install jasmine-node -g
@@ -28,7 +28,7 @@ npm install jasmine-node -g
 jasmine-node ./spec/describe_Game_spec.js --autotest --watch ./game.js
 ```
 
-#####To run the end-to-end tests you first must install [protractor](https://github.com/angular/protractor/blob/master/docs/getting-started.md).
+##### To run the end-to-end tests you first must install [protractor](https://github.com/angular/protractor/blob/master/docs/getting-started.md).
 
 Then run:
 
@@ -36,7 +36,7 @@ Then run:
     
 This will launch an instance of Chrome browser and execute the tests.
 
-#####If you want the server to load up everytime you change the back end:
+##### If you want the server to load up everytime you change the back end:
 
     npm install -g nodemon
 
@@ -44,9 +44,9 @@ Then run the following instead of `node server.js`:
 
     nodemon server.js
 
-##Signing up, and deploying to Heroku
+## Signing up, and deploying to Heroku
 
-###Documentation
+### Documentation
 
 From heroku.com, click Documentation, then click the Getting Started button, then click Node.js from the list of options on the left...which will take you here: https://devcenter.heroku.com/articles/nodejs
 
