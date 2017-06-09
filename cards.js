@@ -13,17 +13,17 @@ function getDeck() {
  */
 function getDeckFromSets(selected, expansions) {
     //Build arrays of the indices that we want to use
-    let blackIndices = [], whiteIndices = [];
-    let blackCards = [], whiteCards = [];
-    selected.forEach(setId => {
+    var blackIndices = [], whiteIndices = [];
+    var blackCards = [], whiteCards = [];
+    selected.forEach(function(setId){
         blackIndices = _.union(blackIndices, card_data[setId].black);
         whiteIndices = _.union(whiteIndices, card_data[setId].white);
     });
-    blackIndices.forEach(i => blackCards.push(card_data.blackCards[i]));
-    whiteIndices.forEach(i => whiteCards.push(card_data.whiteCards[i]));
+    blackIndices.forEach(function(i) {blackCards.push(card_data.blackCards[i])});
+    whiteIndices.forEach(function(i) {whiteCards.push(card_data.whiteCards[i])});
     //Get expansions
     expansions.forEach(function (expansionId) {
-      let match = _.findWhere(openExpansions(), {id: expansionId});
+      var match = _.findWhere(openExpansions(), {id: expansionId});
       if (match !== undefined) {
         blackCards = blackCards.concat(match.black);
         whiteCards = whiteCards.concat(match.white);
@@ -60,11 +60,11 @@ function getSets() {
 }
 
 function openExpansions() {
-  let expansions = [];
+  var expansions = [];
   fs.readdirSync('expansions').forEach(function (path) {
     if (path.indexOf(".json") !== -1) {
       try {
-        let file = JSON.parse(fs.readFileSync('expansions/' + path));
+        var file = JSON.parse(fs.readFileSync('expansions/' + path));
         expansions.push({
           id: file.id,
           name: file.name,
@@ -81,7 +81,7 @@ function openExpansions() {
 }
 
 function getExpansions() {
-  return openExpansions().map(expansion => {return {id: expansion.id, name: expansion.name, size: expansion.size}});
+  return openExpansions().map(function(expansion) {return {id: expansion.id, name: expansion.name, size: expansion.size}});
 }
 
 exports.getDeck = getDeck;

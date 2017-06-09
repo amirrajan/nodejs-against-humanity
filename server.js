@@ -9,7 +9,7 @@ var socketCount = 0;
 var config = require('./config.js');
 var cards  = require('./cards.js');
 
-server.listen(process.env.PORT || config.port || 3000);
+server.listen(80);
 
 app.set('view engine', 'ejs');
 app.set('view options', { layout: false });
